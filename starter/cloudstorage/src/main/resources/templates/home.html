@@ -31,7 +31,7 @@
                                     <div class="col-sm-2">
                                         <label for="fileUpload">Upload a New File:</label>
                                     </div>
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-6"> <!-- TODO file upload -->
                                         <input type="file" class="form-control-file" id="fileUpload" name="fileUpload">
                                     </div>
                                     <div class="col-sm-4">
@@ -49,12 +49,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr th:each="fileForm : ${fileForms}">
                                     <td>
                                         <a target="_blank" class="btn btn-success">View</a>
                                         <a  class="btn btn-danger">Delete</a>
                                     </td>
-                                    <th scope="row">ExampleFile.txt</th>
+                                    <th scope="row" th:text="${fileForm.fileName} + ${fileForm.extension}">ExampleFile.txt</th>
                                 </tr>
                                 </tbody>
                             </table>
@@ -68,10 +68,10 @@
                         <div class="table-responsive">
                             <table class="table table-striped" id="userTable">
                                 <thead>
-                                    <tr>
+                                    <tr th:each="noteForm : ${noteForms}">
                                         <th style="width: 20%" scope="col"></th>
-                                        <th style="width: 20%" scope="col">Title</th>
-                                        <th style="width: 60%" scope="col">Description</th>
+                                        <th style="width: 20%" scope="col" th:text="${noteForm.title}">Title</th>
+                                        <th style="width: 60%" scope="col" th:text="${noteForm.description}">Description</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -134,14 +134,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr>
+                                <tr th:each="credentialForm : ${credentialForms}">
                                     <td>
                                         <button type="button" class="btn btn-success">Edit</button>
                                         <a class="btn btn-danger">Delete</a>
                                     </td>
-                                    <th scope="row">Example Credential URL</th>
-                                    <td>Example Credential Username</td>
-                                    <td>Example Credential Password</td>
+                                    <th scope="row" th:text="${credentialForm.url}">Example Credential URL</th>
+                                    <td th:text="${credentialForm.username}">Example Credential Username</td>
+                                    <td th:text="${credentialForm.password}">Example Credential Password</td>
                                 </tr>
                                 </tbody>
                             </table>
