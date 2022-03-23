@@ -25,14 +25,18 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <form action="#" enctype="multipart/form-data" method="POST">
+                        <form action="#" enctype="multipart/form-data" method="POST" th:action="@{'/home'}">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
                                     <div class="col-sm-2">
                                         <label for="fileUpload">Upload a New File:</label>
                                     </div>
-                                    <div class="col-sm-6"> <!-- TODO file upload -->
-                                        <input type="file" class="form-control-file" id="fileUpload" name="fileUpload">
+                                    <div class="col-sm-6">
+                                        <input
+                                                type="hidden"
+                                                th:name="${_csrf.parameterName}"
+                                                th:value="${_csrf.token}" />
+                                        <input type="file" class="form-control-file" id="fileUpload" name="file">
                                     </div>
                                     <div class="col-sm-4">
                                         <button type="submit" class="btn btn-dark">Upload</button>
@@ -40,6 +44,9 @@
                                 </div>
                             </div>
                         </form>
+                        <div class="row" style="margin: 1em;" th:if="${message}">
+                            <span style="font-style: italic" th:text="${message}"/>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-striped" id="fileTable">
                                 <thead>

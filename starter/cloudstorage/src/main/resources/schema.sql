@@ -19,11 +19,10 @@ CREATE TABLE IF NOT EXISTS FILES (
     fileId INT PRIMARY KEY auto_increment,
     filename VARCHAR,
     contenttype VARCHAR,
-    filesize VARCHAR,
-    userid INT,
-    filedata BLOB,
-    foreign key (userid) references USERS(userid)
+    filedata BLOB
 );
+--     filesize VARCHAR,
+-- foreign key (userid) references USERS(userid)
 
 CREATE TABLE IF NOT EXISTS CREDENTIALS (
     credentialid INT PRIMARY KEY auto_increment,

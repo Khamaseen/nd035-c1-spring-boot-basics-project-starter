@@ -15,10 +15,10 @@ public class FileFormMapper {
 
     public FileForm mapFileToFileForm(File file) {
         return new FileForm(
-                file.getFileName(),
-                file.getUri(),
-                file.getExtension(),
-                file.getUserId()
+                file.getFilename(),
+                file.getFilesize(),
+                file.getContenttype(),
+                file.getUserid()
         );
     }
 }
