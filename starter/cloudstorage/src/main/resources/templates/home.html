@@ -3,6 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
         <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
 
@@ -25,7 +27,7 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <form action="#" enctype="multipart/form-data" method="POST" th:action="@{'/home'}">
+                        <form id="formFileUpload" action="#" enctype="multipart/form-data" method="POST" th:action="@{'/home'}">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
                                     <div class="col-sm-2">
@@ -39,7 +41,7 @@
                                         <input type="file" class="form-control-file" id="fileUpload" name="file">
                                     </div>
                                     <div class="col-sm-4">
-                                        <button type="submit" class="btn btn-dark">Upload</button>
+                                        <button id="submitFile" type="submit" class="btn btn-dark">Upload</button>
                                     </div>
                                 </div>
                             </div>
@@ -58,10 +60,21 @@
                                 <tbody>
                                 <tr th:each="fileForm : ${fileForms}">
                                     <td>
-                                        <a target="_blank" class="btn btn-success">View</a>
-                                        <a  class="btn btn-danger">Delete</a>
+                                        <a target="_blank" class="btn btn-success"
+                                           th:data-parameter1="${fileForm.fileId}"
+                                           th:data-parameter2="${fileForm.fileName}"
+                                           onclick="getEntity(
+                                               this.getAttribute('data-parameter1'),
+                                               'FILE',
+                                               this.getAttribute('data-parameter2')
+                                               )"
+                                        >Download</a>
+                                        <a  class="btn btn-danger"
+                                            th:data-parameter1="${fileForm.fileId}"
+                                            onclick="deleteEntity(this.getAttribute('data-parameter1'), 'FILE');"
+                                        >Delete</a>
                                     </td>
-                                    <th scope="row" th:text="${fileForm.fileName} + ${fileForm.extension}">ExampleFile.txt</th>
+                                    <th scope="row" th:text="${fileForm.fileName}">ExampleFile.txt</th>
                                 </tr>
                                 </tbody>
                             </table>
@@ -197,8 +210,23 @@
         <script th:src="@{/js/popper.min.js}"></script>
         <script th:src="@{/js/bootstrap.min.js}"></script>
 
-        <!--For opening the note modal-->
         <script type="text/javascript">
+            const BASE_URL = 'http://localhost:8080/home';
+            const DELETE = {
+                CREDENTIALS: '/delete-credentials/{id}',
+                FILE: '/delete-file/{id}',
+                NOTE: '/delete-note/{id}',
+            }
+
+            const GET = {
+                CREDENTIALS: '/get-credentials/{id}',
+                FILE: '/get-file/{id}',
+                NOTE: '/get-note/{id}',
+            }
+
+            const token = $("meta[name='_csrf']").attr("content");
+            const header = $("meta[name='_csrf_header']").attr("content");
+
             // For opening the note modal
             function showNoteModal(noteId, noteTitle, noteDescription) {
                 $('#note-id').val(noteId ? noteId : '');
@@ -215,6 +243,78 @@
                 $('#credential-password').val(password ? password : '');
                 $('#credentialModal').modal('show');
             }
+
+            const submitFile = document.querySelector('#submitFile');
+            submitFile.addEventListener('click', (event) => listenToForm(event, 'formFileUpload'));
+            function listenToForm(event, formId) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                let formData = new FormData( document.getElementById(formId) );
+
+                let url = BASE_URL + '/upload-file';
+                let xhr = new XMLHttpRequest();
+                xhr.open("POST", url, true)
+                xhr.setRequestHeader(header, token);
+                xhr.onload = () => refreshPage()
+                xhr.send(formData);
+            }
+
+            function getEntity(entityId, entityType, name) {
+                let locationEndpoint = entityType === 'FILE' ? GET.FILE :
+                    entityType === 'NOTE' ? GET.NOTE :
+                        GET.CREDENTIALS
+
+                let url = BASE_URL +  locationEndpoint.replace('{id}', entityId);
+
+                let xhr = new XMLHttpRequest();
+                xhr.open("GET", url, true);
+                xhr.setRequestHeader(header, token);
+                xhr.responseType = 'blob';
+
+                const attachment = `attachment; filename="${name}"`
+                const contentTypeReponse = xhr.getResponseHeader("Content-Type");
+
+                xhr.onreadystatechange = function() {
+                    if(this.readyState === this.HEADERS_RECEIVED) {
+                        const contentDisposition = xhr.getResponseHeader("content-disposition");
+                        if (contentDisposition !== attachment) {
+                            xhr.abort();
+                        }
+                    }
+                }
+
+                xhr.onload = (e) => {
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    let url = URL.createObjectURL(e.target.response);
+                    a.href = url;
+                    a.download = name;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                };
+                xhr.send();
+            }
+
+            function deleteEntity(entityId, entityType) {
+                let locationEndpoint = entityType === 'FILE' ? DELETE.FILE :
+                                        entityType === 'NOTE' ? DELETE.NOTE :
+                                        DELETE.CREDENTIALS
+
+                let url = BASE_URL +  locationEndpoint.replace('{id}', entityId);
+
+                let xhr = new XMLHttpRequest();
+                xhr.open("DELETE", url, true);
+                xhr.setRequestHeader(header, token);
+                xhr.onload = () => refreshPage()
+                xhr.send();
+            }
+
+            function refreshPage() {
+                window.location.reload();
+            }
+
         </script>
     </body>
 </html>

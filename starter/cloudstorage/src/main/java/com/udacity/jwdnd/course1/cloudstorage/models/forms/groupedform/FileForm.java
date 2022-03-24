@@ -1,44 +1,56 @@
 package com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform;
 
 public class FileForm {
+    private Integer fileId;
     private String fileName;
-    private String uri;
-    private String extension;
-    private Integer userId;
+    private String fileType;
+    private Long fileSizeInBytes;
+    private String fileSizeToDisplay;
+    private byte[] fileDataAsBlob;
+    private Integer userid;
 
-    public FileForm(String fileName, String uri, String extension, Integer userId) {
+    public FileForm(
+            Integer fileId,
+            String fileName,
+            String fileType,
+            Long fileSizeInBytes,
+            String fileSizeToDisplay,
+            byte[] fileDataAsBlob,
+            Integer userid
+    ) {
+        this.fileId = fileId;
         this.fileName = fileName;
-        this.uri = uri;
-        this.extension = extension;
-        this.userId = userId;
+        this.fileSizeInBytes = fileSizeInBytes;
+        this.fileSizeToDisplay = fileSizeToDisplay;
+        this.fileDataAsBlob = fileDataAsBlob;
+        this.userid = userid;
+    }
+
+    public Integer getFileId() {
+        return fileId;
     }
 
     public String getFileName() {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public String getFileType() {
+        return fileType;
     }
 
-    public String getUri() {
-        return uri;
+    public Long getFileSizeInBytes() {
+        return fileSizeInBytes;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public String getFileSizeToDisplay() {
+        return fileSizeToDisplay;
     }
 
-    public String getExtension() {
-        return extension;
+    public byte[] getFileDataAsBlob() {
+        return fileDataAsBlob;
     }
 
-    public void setExtension(String extension) {
-        this.extension = extension;
+    public Integer getUserid() {
+        return userid;
     }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
 }

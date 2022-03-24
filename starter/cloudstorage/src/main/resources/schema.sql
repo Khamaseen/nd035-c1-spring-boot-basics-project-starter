@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS USERS (
   userid INT PRIMARY KEY auto_increment,
   username VARCHAR(20),
-  salt VARCHAR,
-  password VARCHAR,
+  salt TEXT,
+  password TEXT,
   firstname VARCHAR(20),
   lastname VARCHAR(20)
 );
@@ -15,13 +15,15 @@ CREATE TABLE IF NOT EXISTS NOTES (
     foreign key (userid) references USERS(userid)
 );
 
+DROP TABLE IF EXISTS FILES;
 CREATE TABLE IF NOT EXISTS FILES (
     fileId INT PRIMARY KEY auto_increment,
-    filename VARCHAR,
-    contenttype VARCHAR,
+    filesizeinbytes LONG,
+    filename TEXT NOT NULL,
+    filetype TEXT NOT NULL,
     filedata BLOB
 );
---     filesize VARCHAR,
+--     contenttype TEXT NOT NULL, REMOVED because of H2 continues error
 -- foreign key (userid) references USERS(userid)
 
 CREATE TABLE IF NOT EXISTS CREDENTIALS (

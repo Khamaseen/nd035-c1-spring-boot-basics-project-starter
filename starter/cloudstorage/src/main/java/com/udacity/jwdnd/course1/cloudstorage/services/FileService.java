@@ -20,10 +20,12 @@ public class FileService {
         this.fileMapper = fileMapper;
     }
 
-    // TODO progress is stopped here
+    public File getFile(Integer fileId) {
+        return this.fileMapper.getFile(fileId);
+    }
+
     public List<FileForm> getFiles(Integer userId) {
         List<File> list = this.fileMapper.getFilesFromUser();
-        System.out.println("get files: " + list);
         if (list == null) {
             list = new ArrayList<File>();
         }
@@ -31,16 +33,20 @@ public class FileService {
         return this.fileFormMapper.mapFilesToFileForms(list);
     }
 
-    public int insertFile(byte[] blob) {
+    public int insertFile(String filename, Long filesize, String fileType, Integer userid, byte[] blob) {
         File file = new File(
-                "fileName",
-                "contentType",
-                "5 MB",
+                filesize,
+                filename,
+                fileType,
                 blob,
-                123
+                userid
         );
 
         return this.fileMapper.insert(file);
+    }
+
+    public int deleteFile(Integer fileId) {
+        return this.fileMapper.delete(fileId);
     }
 
 }

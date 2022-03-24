@@ -2,56 +2,25 @@ package com.udacity.jwdnd.course1.cloudstorage.models;
 
 public class File {
     private Integer fileId;
-    private String filename;
-    private String contenttype;
-    private String filesize;
-    private byte[] filedata;
+    private String fileName;
+    private String fileType;
+    private Long fileSizeInBytes;
+    private byte[] fileDataAsBlob;
     private Integer userid;
 
-    public File(Integer fileId, String filename, String contenttype, byte[] filedata) {
+    public File(Integer fileId, Long fileSizeInBytes, String fileName, String fileType, byte[] fileDataAsBlob) {
         this.fileId = fileId;
-        this.filename = filename;
-        this.contenttype = contenttype;
-        this.filedata = filedata;
+        this.fileSizeInBytes = fileSizeInBytes;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.fileDataAsBlob = fileDataAsBlob;
     }
 
-    public File(String filename, String contenttype, String filesize, byte[] filedata, Integer userid) {
-        this.filename = filename;
-        this.contenttype = contenttype;
-        this.filesize = filesize;
-        this.filedata = filedata;
-        this.userid = userid;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getFilesize() {
-        return filesize;
-    }
-
-    public void setFilesize(String filesize) {
-        this.filesize = filesize;
-    }
-
-    public String getContenttype() {
-        return contenttype;
-    }
-
-    public void setContenttype(String contenttype) {
-        this.contenttype = contenttype;
-    }
-
-    public Integer getUserid() {
-        return userid;
-    }
-
-    public void setUserid(Integer userid) {
+    public File(Long fileSizeInBytes, String fileName, String fileType, byte[] fileDataAsBlob, Integer userid) {
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.fileSizeInBytes = fileSizeInBytes;
+        this.fileDataAsBlob = fileDataAsBlob;
         this.userid = userid;
     }
 
@@ -63,11 +32,43 @@ public class File {
         this.fileId = fileId;
     }
 
-    public byte[] getFiledata() {
-        return filedata;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFiledata(byte[] filedata) {
-        this.filedata = filedata;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Long getFileSizeInBytes() {
+        return fileSizeInBytes;
+    }
+
+    public void setFileSizeInBytes(Long fileSizeInBytes) {
+        this.fileSizeInBytes = fileSizeInBytes;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public byte[] getFileDataAsBlob() {
+        return fileDataAsBlob;
+    }
+
+    public void setFileDataAsBlob(byte[] fileDataAsBlob) {
+        this.fileDataAsBlob = fileDataAsBlob;
+    }
+
+    public Integer getUserid() {
+        return userid;
+    }
+
+    public void setUserid(Integer userid) {
+        this.userid = userid;
     }
 }
