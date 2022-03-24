@@ -38,6 +38,10 @@ public class CredentialForm {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public Integer getUserId() {
         return userId;
     }

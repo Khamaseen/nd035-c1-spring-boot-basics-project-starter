@@ -4,7 +4,7 @@ public class Credential {
     private Integer credentialId;
     private String url;
     private String username;
-    private String key;
+    private byte[] key;
     private String password;
     private Integer userId;
 
@@ -16,7 +16,7 @@ public class Credential {
         this.userId = userId;
     }
 
-    public Credential(String url, String username, String key, String password, Integer userId) {
+    public Credential(String url, String username, byte[] key, String password, Integer userId) {
         this.url = url;
         this.username = username;
         this.key = key;
@@ -24,7 +24,7 @@ public class Credential {
         this.userId = userId;
     }
 
-    public Credential(Integer credentialId, String url, String username, String key, String password, Integer userId) {
+    public Credential(Integer credentialId, String url, String username, byte[] key, String password, Integer userId) {
         this.credentialId = credentialId;
         this.url = url;
         this.username = username;
@@ -57,11 +57,11 @@ public class Credential {
         this.username = username;
     }
 
-    public String getKey() {
+    public byte[] getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(byte[] key) {
         this.key = key;
     }
 

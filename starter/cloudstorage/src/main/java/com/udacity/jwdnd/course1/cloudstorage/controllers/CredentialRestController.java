@@ -22,7 +22,7 @@ public class CredentialRestController {
     @GetMapping("/get-credential/{credentialId}")
     public ResponseEntity downloadCredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication) {
         try {
-            CredentialForm credential = this.credentialService.getCredential(credentialId);
+            CredentialForm credential = this.credentialService.getDecryptedCredential(credentialId);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; credentialUsername=\"" + credential.getUsername() + "\"")
                     .body(credential);
@@ -66,7 +66,7 @@ public class CredentialRestController {
     @DeleteMapping("/delete-credential/{credentialId}")
     public void deletecredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication) {
         try {
-            CredentialForm credentialToDelete = this.credentialService.getCredential(credentialId);
+            CredentialForm credentialToDelete = this.credentialService.getDecryptedCredential(credentialId);
             if (credentialToDelete != null) {
                 // TODO check if user is really authorized (is his/her credential) authentication.getCredentials()
                 this.credentialService.deleteCredential(credentialId);

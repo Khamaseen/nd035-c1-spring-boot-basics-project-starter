@@ -14,10 +14,16 @@ public class CredentialService {
 
     private final CredentialFormMapper credentialFormMapper;
     private final CredentialMapper credentialMapper;
+    private final EncryptionService encryptionService;
 
-    public CredentialService(CredentialFormMapper credentialFormMapper, CredentialMapper credentialMapper) {
+    public CredentialService(
+            CredentialFormMapper credentialFormMapper,
+            CredentialMapper credentialMapper,
+            EncryptionService encryptionService
+            ) {
         this.credentialFormMapper = credentialFormMapper;
         this.credentialMapper = credentialMapper;
+        this.encryptionService = encryptionService;
     }
 
     // TODO returns mock, remove this
@@ -32,11 +38,14 @@ public class CredentialService {
         return this.credentialFormMapper.mapCredentialsToCredentialForms(list);
     }
 
-    public CredentialForm getCredential(Integer credentialId) {
+    public CredentialForm getDecryptedCredential(Integer credentialId) {
         Credential credential = this.credentialMapper.getCredential(credentialId);
 
         if (credential != null) {
-            return this.credentialFormMapper.mapCredentialToCredentialForm(credential);
+            CredentialForm credentialForm = this.credentialFormMapper.mapCredentialToCredentialForm(credential);
+            credentialForm.setPassword(this.encryptionService.decryptValue(credential.getPassword(), credential.getKey()));
+
+            return credentialForm;
         }
 
         return null;
@@ -55,12 +64,12 @@ public class CredentialService {
     }
 
     public int insertCredential(String url, String username, String password, Integer userId) {
-        String fakeKey = "key"; // TODO key should be used for encryption & decryption
+        byte[] key = this.encryptionService.generateKey();
         Credential newCredential = new Credential(
                 url,
                 username,
-                fakeKey,
-                password,
+                key,
+                this.encryptionService.encryptValue(password, key),
                 userId
         );
 

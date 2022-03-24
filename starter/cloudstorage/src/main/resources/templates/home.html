@@ -164,13 +164,18 @@
                                 <tr th:each="credentialForm : ${credentialForms}">
                                     <td>
                                         <button type="button" class="btn btn-success"
-                                                th:data-parameter1="${credentialForm.noteId}"
-                                                th:data-parameter2="${credentialForm.title}"
-                                                th:data-parameter3="${credentialForm.description}"
-                                                onclick="showCredentialModal(this.getAttribute('data-parameter1'), this.getAttribute('data-parameter2'), this.getAttribute('data-parameter3'));"
+                                                th:data-parameter1="${credentialForm.credentialId}"
+                                                th:data-parameter2="${credentialForm.url}"
+                                                th:data-parameter3="${credentialForm.username}"
+                                                th:data-parameter4="${credentialForm.password}"
+                                                onclick="showCredentialModal(
+                                                    this.getAttribute('data-parameter1'),
+                                                    this.getAttribute('data-parameter2'),
+                                                    this.getAttribute('data-parameter2'),
+                                                    this.getAttribute('data-parameter3'));"
                                         >Edit</button>
                                         <a class="btn btn-danger"
-                                           th:data-parameter1="${credentialForm.noteId}"
+                                           th:data-parameter1="${credentialForm.credentialId}"
                                            onclick="deleteEntity(this.getAttribute('data-parameter1'), 'CREDENTIAL');"
                                         >Delete</a>
                                     </td>
@@ -192,19 +197,19 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form id="formCredentialUpload" action="#" method="POST">
                                             <input type="hidden" name="credentialId" id="credential-id">
                                             <div class="form-group">
-                                                <label for="note-title" class="col-form-label">URL</label>
-                                                <input type="text" name= "url" class="form-control" id="credential-url" maxlength="100" required>
+                                                <label for="credential-url" class="col-form-label">URL</label>
+                                                <input type="text" name="url" class="form-control" id="credential-url" maxlength="100" required>
                                             </div>
                                             <div class="form-group">
-                                                <label for="note-title" class="col-form-label">Username</label>
-                                                <input type="text" name= "username" class="form-control" id="credential-username" maxlength="30" required>
+                                                <label for="credential-username" class="col-form-label">Username</label>
+                                                <input type="text" name="username" class="form-control" id="credential-username" maxlength="30" required>
                                             </div>
                                             <div class="form-group">
-                                                <label for="note-title" class="col-form-label">Password</label>
-                                                <input type="text" name= "password" class="form-control" id="credential-password" maxlength="30" required>
+                                                <label for="credential-password" class="col-form-label">Password</label>
+                                                <input type="text" name="password" class="form-control" id="credential-password" maxlength="30" required>
                                             </div>
                                             <button id="submitCredential" type="submit" class="d-none"></button>
                                         </form>
@@ -262,6 +267,7 @@
                 $('#credential-url').val(url ? url : '');
                 $('#credential-username').val(username ? username : '');
                 $('#credential-password').val(password ? password : '');
+                $('#credential-password').disabled = !!password;
                 $('#credentialModal').modal('show');
             }
 
@@ -269,10 +275,7 @@
             const submitNote = document.querySelector('#submitNote');
             const submitCredential = document.querySelector('#submitCredential');
             submitFile.addEventListener('click', (event) => listenToForm(event, 'formFileUpload', 'FILE'));
-            submitNote.addEventListener('click', (event) => {
-                console.log('on lcick');
-                listenToForm(event, 'formNoteUpload', 'NOTE');
-            });
+            submitNote.addEventListener('click', (event) => listenToForm(event, 'formNoteUpload', 'NOTE'));
             submitCredential.addEventListener('click', (event) => listenToForm(event, 'formCredentialUpload', 'CREDENTIAL'));
 
             function listenToForm(event, formId, entityType) {
@@ -293,7 +296,7 @@
                 xhr.setRequestHeader(header, token);
                 // xhr.onload = () => refreshPage()
 
-                if (entityType === 'NOTE') {
+                if (entityType === 'NOTE' || entityType === 'CREDENTIAL') {
                     xhr.onload = function () {
                         if (xhr.readyState === xhr.DONE) {
                             if (xhr.status === 200) {
