@@ -1,30 +1,34 @@
 package com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform;
 
 public class NoteForm {
+    private Integer noteId;
     private String title;
     private String description;
     private Integer userId;
 
-    public NoteForm(String title, String description, Integer userId) {
+    public NoteForm(Integer noteId, String title, String description) {
+        this.noteId = noteId;
+        this.title = title;
+        this.description = description;
+    }
+
+    public NoteForm(Integer noteId, String title, String description, Integer userId) {
+        this.noteId = noteId;
         this.title = title;
         this.description = description;
         this.userId = userId;
+    }
+
+    public Integer getNoteId() {
+        return noteId;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Integer getUserId() {

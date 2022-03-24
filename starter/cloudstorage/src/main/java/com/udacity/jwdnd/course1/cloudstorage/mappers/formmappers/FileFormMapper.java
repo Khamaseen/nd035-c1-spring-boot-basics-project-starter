@@ -15,7 +15,6 @@ public class FileFormMapper {
     }
 
     public FileForm mapFileToFileForm(File file) {
-        System.out.println(file.getFileType());
         return new FileForm(
                 file.getFileId(),
                 file.getFileName(),

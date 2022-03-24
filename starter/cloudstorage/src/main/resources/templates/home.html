@@ -88,20 +88,27 @@
                         <div class="table-responsive">
                             <table class="table table-striped" id="userTable">
                                 <thead>
-                                    <tr th:each="noteForm : ${noteForms}">
+                                    <tr>
                                         <th style="width: 20%" scope="col"></th>
-                                        <th style="width: 20%" scope="col" th:text="${noteForm.title}">Title</th>
-                                        <th style="width: 60%" scope="col" th:text="${noteForm.description}">Description</th>
+                                        <th style="width: 20%" scope="col">Title</th>
+                                        <th style="width: 60%" scope="col">Description</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    <tr th:each="noteForm : ${noteForms}">
                                         <td>
-                                            <button type="button" class="btn btn-success">Edit</button>
-                                            <a class="btn btn-danger">Delete</a>
+                                            <button type="button" class="btn btn-success"
+                                                    th:data-parameter1="${noteForm.noteId}"
+                                                    th:data-parameter2="${noteForm.title}"
+                                                    th:data-parameter3="${noteForm.description}"
+                                                    onclick="showNoteModal(this.getAttribute('data-parameter1'), this.getAttribute('data-parameter2'), this.getAttribute('data-parameter3'));">Edit</button>
+                                            <a class="btn btn-danger"
+                                               th:data-parameter1="${noteForm.noteId}"
+                                               onclick="deleteEntity(this.getAttribute('data-parameter1'), 'NOTE');"
+                                            >Delete</a>
                                         </td>
-                                        <th scope="row">Example Note Title</th>
-                                        <td>Example Note Description </td>
+                                        <th scope="row" th:text="${noteForm.title}">Example Note Title</th>
+                                        <td th:text="${noteForm.description}">Example Note Description </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -117,7 +124,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
+                                        <form id="formNoteUpload" action="#" method="POST">
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
@@ -127,12 +134,12 @@
                                                 <label for="note-description" class="col-form-label">Description</label>
                                                 <textarea class="form-control" name="noteDescription" id="note-description" rows="5" maxlength="1000" required></textarea>
                                             </div>
-                                            <button id="noteSubmit" type="submit" class="d-none"></button>
+                                            <button id="submitNote" type="submit" class="d-none"></button>
                                         </form>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="$('#noteSubmit').click();">Save changes</button>
+                                        <button type="button" class="btn btn-primary" onclick="$('#submitNote').click();">Save changes</button>
                                     </div>
                                 </div>
                             </div>
@@ -156,8 +163,16 @@
                                 <tbody>
                                 <tr th:each="credentialForm : ${credentialForms}">
                                     <td>
-                                        <button type="button" class="btn btn-success">Edit</button>
-                                        <a class="btn btn-danger">Delete</a>
+                                        <button type="button" class="btn btn-success"
+                                                th:data-parameter1="${credentialForm.noteId}"
+                                                th:data-parameter2="${credentialForm.title}"
+                                                th:data-parameter3="${credentialForm.description}"
+                                                onclick="showCredentialModal(this.getAttribute('data-parameter1'), this.getAttribute('data-parameter2'), this.getAttribute('data-parameter3'));"
+                                        >Edit</button>
+                                        <a class="btn btn-danger"
+                                           th:data-parameter1="${credentialForm.noteId}"
+                                           onclick="deleteEntity(this.getAttribute('data-parameter1'), 'CREDENTIAL');"
+                                        >Delete</a>
                                     </td>
                                     <th scope="row" th:text="${credentialForm.url}">Example Credential URL</th>
                                     <td th:text="${credentialForm.username}">Example Credential Username</td>
@@ -191,12 +206,12 @@
                                                 <label for="note-title" class="col-form-label">Password</label>
                                                 <input type="text" name= "password" class="form-control" id="credential-password" maxlength="30" required>
                                             </div>
-                                            <button id="credentialSubmit" type="submit" class="d-none"></button>
+                                            <button id="submitCredential" type="submit" class="d-none"></button>
                                         </form>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="$('#credentialSubmit').click();">Save changes</button>
+                                        <button type="button" class="btn btn-primary" onclick="$('#submitCredential').click();">Save changes</button>
                                     </div>
                                 </div>
                             </div>
@@ -212,16 +227,22 @@
 
         <script type="text/javascript">
             const BASE_URL = 'http://localhost:8080/home';
+            const POST = {
+                CREDENTIALS: '/credentials/upload-credential',
+                FILE: '/files/upload-file',
+                NOTE: '/notes/upload-note',
+            }
+
             const DELETE = {
-                CREDENTIALS: '/delete-credentials/{id}',
-                FILE: '/delete-file/{id}',
-                NOTE: '/delete-note/{id}',
+                CREDENTIALS: '/credentials/delete-credentials/{id}',
+                FILE: '/files/delete-file/{id}',
+                NOTE: '/notes/delete-note/{id}',
             }
 
             const GET = {
-                CREDENTIALS: '/get-credentials/{id}',
-                FILE: '/get-file/{id}',
-                NOTE: '/get-note/{id}',
+                CREDENTIALS: '/credentials/get-credentials/{id}',
+                FILE: '/files/get-file/{id}',
+                NOTE: '/notes/get-note/{id}',
             }
 
             const token = $("meta[name='_csrf']").attr("content");
@@ -245,19 +266,49 @@
             }
 
             const submitFile = document.querySelector('#submitFile');
-            submitFile.addEventListener('click', (event) => listenToForm(event, 'formFileUpload'));
-            function listenToForm(event, formId) {
+            const submitNote = document.querySelector('#submitNote');
+            const submitCredential = document.querySelector('#submitCredential');
+            submitFile.addEventListener('click', (event) => listenToForm(event, 'formFileUpload', 'FILE'));
+            submitNote.addEventListener('click', (event) => {
+                console.log('on lcick');
+                listenToForm(event, 'formNoteUpload', 'NOTE');
+            });
+            submitCredential.addEventListener('click', (event) => listenToForm(event, 'formCredentialUpload', 'CREDENTIAL'));
+
+            function listenToForm(event, formId, entityType) {
                 event.preventDefault();
                 event.stopPropagation();
 
+                console.log('stopped propegation');
                 let formData = new FormData( document.getElementById(formId) );
+                console.log('form data: ', formData);
 
-                let url = BASE_URL + '/upload-file';
+                let locationEndpoint = entityType === 'FILE' ? POST.FILE :
+                    entityType === 'NOTE' ? POST.NOTE :
+                        POST.CREDENTIALS
+                let url = BASE_URL + locationEndpoint;
+
                 let xhr = new XMLHttpRequest();
                 xhr.open("POST", url, true)
                 xhr.setRequestHeader(header, token);
-                xhr.onload = () => refreshPage()
-                xhr.send(formData);
+                // xhr.onload = () => refreshPage()
+
+                if (entityType === 'NOTE') {
+                    xhr.onload = function () {
+                        if (xhr.readyState === xhr.DONE) {
+                            if (xhr.status === 200) {
+                                refreshPage();
+                            } else {
+                                // showError in modal
+                            }
+                        }
+                    }
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    const json = JSON.stringify(Object.fromEntries(formData));
+                    xhr.send(json);
+                } else {
+                    xhr.send({ data: formData });
+                }
             }
 
             function getEntity(entityId, entityType, name) {
@@ -272,9 +323,7 @@
                 xhr.setRequestHeader(header, token);
                 xhr.responseType = 'blob';
 
-                const attachment = `attachment; filename="${name}"`
-                const contentTypeReponse = xhr.getResponseHeader("Content-Type");
-
+                const attachment = `attachment; filename="${name}"`;
                 xhr.onreadystatechange = function() {
                     if(this.readyState === this.HEADERS_RECEIVED) {
                         const contentDisposition = xhr.getResponseHeader("content-disposition");
@@ -295,6 +344,10 @@
                     window.URL.revokeObjectURL(url);
                 };
                 xhr.send();
+            }
+
+            function editEntity(entityId, entityType) {
+
             }
 
             function deleteEntity(entityId, entityType) {

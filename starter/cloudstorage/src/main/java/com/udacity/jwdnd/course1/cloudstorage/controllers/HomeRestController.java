@@ -4,7 +4,6 @@ import com.google.gson.JsonSyntaxException;
 import com.udacity.jwdnd.course1.cloudstorage.models.File;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping("/home")
+@RequestMapping("/home/files")
 public class HomeRestController {
 
     private FileService fileService;
@@ -30,6 +29,7 @@ public class HomeRestController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
                     .body(file);
         } catch (Error e) {
+            System.err.println(e);
             return ResponseEntity.internalServerError().body(new Object());
         }
     }
@@ -49,7 +49,7 @@ public class HomeRestController {
             Integer userId = 123;
             this.fileService.insertFile(file.getOriginalFilename(), file.getSize(), file.getContentType(), userId, blob);
         } catch (Exception e) {
-            //
+            System.err.println(e);
         }
 
     }
@@ -60,11 +60,10 @@ public class HomeRestController {
             File fileToDelete = this.fileService.getFile(fileId);
             if (fileToDelete != null) {
                 // TODO check if user is really authorized (is his/her file) authentication.getCredentials()
-                int deleteFiles = this.fileService.deleteFile(fileId);
-                System.out.println(deleteFiles);
+                this.fileService.deleteFile(fileId);
             }
         } catch (JsonSyntaxException e) {
-            //
+            System.err.println(e);
         }
     }
 

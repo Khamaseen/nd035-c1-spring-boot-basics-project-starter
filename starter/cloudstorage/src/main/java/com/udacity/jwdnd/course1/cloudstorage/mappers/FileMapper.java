@@ -8,12 +8,14 @@ import java.util.List;
 @Mapper
 public interface FileMapper {
 
+    // TODO add user Id
     @Select("SELECT * FROM FILES")
     List<File> getFilesFromUser();
 
     @Select("SELECT * FROM FILES WHERE fileId = #{fileId}")
     File getFile(Integer fileId);
 
+    // TODO insert user Id
     @Insert("INSERT INTO FILES " +
             "(filesizeinbytes, filename, filetype, filedata) " +
             "VALUES" +

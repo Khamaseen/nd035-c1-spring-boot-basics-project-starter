@@ -15,10 +15,11 @@ public class CredentialFormMapper {
 
     public CredentialForm mapCredentialToCredentialForm(Credential credential) {
         return new CredentialForm(
-                credential.getUserId(),
+                credential.getCredentialId(),
                 credential.getUrl(),
                 credential.getUsername(),
-                credential.getPassword()
-        );
+                credential.getPassword(),
+                credential.getUserId()
+                );
     }
 }
