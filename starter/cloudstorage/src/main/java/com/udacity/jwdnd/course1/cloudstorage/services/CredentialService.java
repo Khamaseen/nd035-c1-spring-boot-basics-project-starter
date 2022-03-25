@@ -38,25 +38,24 @@ public class CredentialService {
         return this.credentialFormMapper.mapCredentialsToCredentialForms(list);
     }
 
-    public CredentialForm getDecryptedCredential(Integer credentialId) {
+    public CredentialForm getCredential(Integer credentialId) {
         Credential credential = this.credentialMapper.getCredential(credentialId);
 
         if (credential != null) {
-            CredentialForm credentialForm = this.credentialFormMapper.mapCredentialToCredentialForm(credential);
-            credentialForm.setPassword(this.encryptionService.decryptValue(credential.getPassword(), credential.getKey()));
-
-            return credentialForm;
+            return this.credentialFormMapper.mapCredentialToCredentialForm(credential);
         }
 
         return null;
     }
 
     public int updateCredential(Integer credentialId, String url, String username, String password, Integer userId) {
+        byte[] key = this.encryptionService.generateKey();
         Credential newCredential = new Credential(
                 credentialId,
                 url,
                 username,
-                password,
+                key,
+                this.encryptionService.encryptValue(password, key),
                 userId
         );
 

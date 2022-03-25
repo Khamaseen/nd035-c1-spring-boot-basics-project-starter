@@ -47,7 +47,7 @@
                             </div>
                         </form>
                         <div class="row" style="margin: 1em;" th:if="${message}">
-                            <span style="font-style: italic" th:text="${message}"/>
+                            <span style="font-style: italic" th:text="${message}"></span>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-striped" id="fileTable">
@@ -167,12 +167,12 @@
                                                 th:data-parameter1="${credentialForm.credentialId}"
                                                 th:data-parameter2="${credentialForm.url}"
                                                 th:data-parameter3="${credentialForm.username}"
-                                                th:data-parameter4="${credentialForm.password}"
+                                                th:data-parameter4="${credentialForm.decryptedPassword}"
                                                 onclick="showCredentialModal(
                                                     this.getAttribute('data-parameter1'),
                                                     this.getAttribute('data-parameter2'),
-                                                    this.getAttribute('data-parameter2'),
-                                                    this.getAttribute('data-parameter3'));"
+                                                    this.getAttribute('data-parameter3'),
+                                                    this.getAttribute('data-parameter4'));"
                                         >Edit</button>
                                         <a class="btn btn-danger"
                                            th:data-parameter1="${credentialForm.credentialId}"
@@ -239,13 +239,13 @@
             }
 
             const DELETE = {
-                CREDENTIALS: '/credentials/delete-credentials/{id}',
+                CREDENTIALS: '/credentials/delete-credential/{id}',
                 FILE: '/files/delete-file/{id}',
                 NOTE: '/notes/delete-note/{id}',
             }
 
             const GET = {
-                CREDENTIALS: '/credentials/get-credentials/{id}',
+                CREDENTIALS: '/credentials/get-credential/{id}',
                 FILE: '/files/get-file/{id}',
                 NOTE: '/notes/get-note/{id}',
             }
@@ -263,11 +263,11 @@
 
             // For opening the credentials modal
             function showCredentialModal(credentialId, url, username, password) {
+                console.log(credentialId, url, username, password)
                 $('#credential-id').val(credentialId ? credentialId : '');
                 $('#credential-url').val(url ? url : '');
                 $('#credential-username').val(username ? username : '');
                 $('#credential-password').val(password ? password : '');
-                $('#credential-password').disabled = !!password;
                 $('#credentialModal').modal('show');
             }
 

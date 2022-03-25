@@ -19,27 +19,12 @@ public class CredentialRestController {
         this.credentialService = credentialService;
     }
 
-    @GetMapping("/get-credential/{credentialId}")
-    public ResponseEntity downloadCredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication) {
-        try {
-            CredentialForm credential = this.credentialService.getDecryptedCredential(credentialId);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; credentialUsername=\"" + credential.getUsername() + "\"")
-                    .body(credential);
-        } catch (Error e) {
-            System.err.println(e);
-            return ResponseEntity.internalServerError().body(new Object());
-        }
-    }
-
     @PostMapping("/upload-credential")
     public void handlecredentialUpload(@RequestBody() String data, Authentication authentication) {
-        System.out.println("upload credential: " + data);
         try {
             Gson gson = new Gson();
             CredentialRestController.JSONCredentialData credentialForm = gson.fromJson(data, CredentialRestController.JSONCredentialData.class);
             if (credentialForm.url == null || credentialForm.username == null || credentialForm.password == null) {
-                System.out.println("returning from not saving");
                 return;
             }
 
@@ -66,7 +51,7 @@ public class CredentialRestController {
     @DeleteMapping("/delete-credential/{credentialId}")
     public void deletecredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication) {
         try {
-            CredentialForm credentialToDelete = this.credentialService.getDecryptedCredential(credentialId);
+            CredentialForm credentialToDelete = this.credentialService.getCredential(credentialId);
             if (credentialToDelete != null) {
                 // TODO check if user is really authorized (is his/her credential) authentication.getCredentials()
                 this.credentialService.deleteCredential(credentialId);

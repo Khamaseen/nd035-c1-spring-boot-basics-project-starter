@@ -5,20 +5,15 @@ public class CredentialForm {
     private String url;
     private String username;
     private String password;
+    private String decryptedPassword;
     private Integer userId;
 
-    public CredentialForm(String url, String username, String password, Integer userId) {
-        this.url = url;
-        this.username = username;
-        this.password = password;
-        this.userId = userId;
-    }
-
-    public CredentialForm(Integer credentialId, String url, String username, String password, Integer userId) {
+    public CredentialForm(Integer credentialId, String url, String username, String password, String decryptedPassword, Integer userId) {
         this.credentialId = credentialId;
         this.url = url;
         this.username = username;
         this.password = password;
+        this.decryptedPassword = decryptedPassword;
         this.userId = userId;
     }
 
@@ -38,8 +33,8 @@ public class CredentialForm {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getDecryptedPassword() {
+        return decryptedPassword;
     }
 
     public Integer getUserId() {
