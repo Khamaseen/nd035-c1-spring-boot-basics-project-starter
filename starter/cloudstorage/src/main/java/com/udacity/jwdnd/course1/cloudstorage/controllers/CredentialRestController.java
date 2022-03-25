@@ -2,10 +2,10 @@ package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform.CredentialForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,34 +14,49 @@ import org.springframework.web.bind.annotation.*;
 public class CredentialRestController {
     
     private final CredentialService credentialService;
+    private final UserService userService;
 
-    public CredentialRestController(CredentialService credentialService) {
+    public CredentialRestController(CredentialService credentialService, UserService userService) {
         this.credentialService = credentialService;
+        this.userService = userService;
     }
 
     @PostMapping("/upload-credential")
-    public void handlecredentialUpload(@RequestBody() String data, Authentication authentication) {
+    public void credentialUpload(@RequestBody() String data, Authentication authentication) {
+        String username = authentication.getName();
+        User currentLoggedInUser = this.userService.getUserByUserName(username);
+
+        if (currentLoggedInUser == null) {
+            return;
+        }
+
         try {
             Gson gson = new Gson();
-            CredentialRestController.JSONCredentialData credentialForm = gson.fromJson(data, CredentialRestController.JSONCredentialData.class);
-            if (credentialForm.url == null || credentialForm.username == null || credentialForm.password == null) {
+            CredentialRestController.JSONCredentialData jsonCredentialData = gson.fromJson(data, CredentialRestController.JSONCredentialData.class);
+            if (jsonCredentialData.url == null || jsonCredentialData.username == null || jsonCredentialData.password == null) {
                 return;
             }
 
-            //TODO get userID
-            Integer userId = 123;
-            if (credentialForm.credentialId != null && !credentialForm.credentialId.trim().isEmpty()) {
-                this.credentialService.updateCredential(
-                        Integer.valueOf(credentialForm.credentialId),
-                        credentialForm.url,
-                        credentialForm.username,
-                        credentialForm.password,
-                        userId);
+            if (jsonCredentialData.credentialId != null && !jsonCredentialData.credentialId.trim().isEmpty()) {
+                Integer credentialId = Integer.valueOf(jsonCredentialData.credentialId);
+                CredentialForm previousCredentialForm = this.credentialService.getCredential(credentialId);
+                if (previousCredentialForm.getUserId() == currentLoggedInUser.getUserId()) {
+                    this.credentialService.updateCredential(
+                            Integer.valueOf(jsonCredentialData.credentialId),
+                            jsonCredentialData.url,
+                            jsonCredentialData.username,
+                            jsonCredentialData.password,
+                            currentLoggedInUser.getUserId()
+                    );
+                }
+
             } else {
-                this.credentialService.insertCredential(credentialForm.url,
-                        credentialForm.username,
-                        credentialForm.password,
-                        userId);
+                this.credentialService.insertCredential(
+                        jsonCredentialData.url,
+                        jsonCredentialData.username,
+                        jsonCredentialData.password,
+                        currentLoggedInUser.getUserId()
+                );
             }
         } catch (Exception e) {
             System.err.println(e);
@@ -50,10 +65,16 @@ public class CredentialRestController {
 
     @DeleteMapping("/delete-credential/{credentialId}")
     public void deletecredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication) {
+        String username = authentication.getName();
+        User currentLoggedInUser = this.userService.getUserByUserName(username);
+
+        if (currentLoggedInUser == null) {
+            return;
+        }
+
         try {
             CredentialForm credentialToDelete = this.credentialService.getCredential(credentialId);
-            if (credentialToDelete != null) {
-                // TODO check if user is really authorized (is his/her credential) authentication.getCredentials()
+            if (credentialToDelete != null && credentialToDelete.getUserId() == currentLoggedInUser.getUserId()) {
                 this.credentialService.deleteCredential(credentialId);
             }
         } catch (JsonSyntaxException e) {

@@ -3,10 +3,10 @@ package com.udacity.jwdnd.course1.cloudstorage.controllers;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,41 +14,39 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/home/notes")
 public class NoteRestController {
 
-    private NoteService noteService;
+    private final UserService userService;
+    private final NoteService noteService;
 
-    public NoteRestController(NoteService noteService) {
+    public NoteRestController(NoteService noteService, UserService userService) {
         this.noteService = noteService;
-    }
-
-    @GetMapping("/get-note/{noteId}")
-    public ResponseEntity downloadnote(@PathVariable("noteId") Integer noteId, Authentication authentication) {
-        try {
-            NoteForm note = this.noteService.getNote(noteId);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; noteTitle=\"" + note.getTitle() + "\"")
-                    .body(note);
-        } catch (Error e) {
-            System.err.println(e);
-            return ResponseEntity.internalServerError().body(new Object());
-        }
+        this.userService = userService;
     }
 
     @PostMapping("/upload-note")
-    public void handlenoteUpload(@RequestBody() String data, Authentication authentication) {
+    public void noteUpload(@RequestBody() String data, Authentication authentication) {
+        String username = authentication.getName();
+        User currentLoggedInUser = this.userService.getUserByUserName(username);
+
+        if (currentLoggedInUser == null) {
+            return;
+        }
 
         try {
             Gson gson = new Gson();
-            JSONNoteData noteForm = gson.fromJson(data, JSONNoteData.class);
-            if (noteForm.noteTitle == null || noteForm.noteDescription == null) {
+            JSONNoteData jsonNoteData = gson.fromJson(data, JSONNoteData.class);
+            if (jsonNoteData.noteTitle == null || jsonNoteData.noteDescription == null) {
                 return;
             }
 
-            //TODO get userID
-            Integer userId = 123;
-            if (noteForm.noteId != null && !noteForm.noteId.trim().isEmpty()) {
-                this.noteService.updateNote(Integer.valueOf(noteForm.noteId), noteForm.noteTitle, noteForm.noteDescription, userId);
+            if (jsonNoteData.noteId != null && !jsonNoteData.noteId.trim().isEmpty()) {
+                Integer noteId = Integer.valueOf(jsonNoteData.noteId);
+                NoteForm previousVersionNote = this.noteService.getNote(noteId);
+                if (previousVersionNote.getUserId() == currentLoggedInUser.getUserId()) {
+                    this.noteService.updateNote(noteId, jsonNoteData.noteTitle, jsonNoteData.noteDescription, currentLoggedInUser.getUserId());
+                }
+
             } else {
-                this.noteService.insertNote(noteForm.noteTitle, noteForm.noteDescription, userId);
+                this.noteService.insertNote(jsonNoteData.noteTitle, jsonNoteData.noteDescription, currentLoggedInUser.getUserId());
             }
         } catch (Exception e) {
             System.err.println(e);
@@ -56,11 +54,17 @@ public class NoteRestController {
     }
 
     @DeleteMapping("/delete-note/{noteId}")
-    public void deletenote(@PathVariable("noteId") Integer noteId, Authentication authentication) {
+    public void deleteNote(@PathVariable("noteId") Integer noteId, Authentication authentication) {
+        String username = authentication.getName();
+        User currentLoggedInUser = this.userService.getUserByUserName(username);
+
+        if (currentLoggedInUser == null) {
+            return;
+        }
+
         try {
             NoteForm noteToDelete = this.noteService.getNote(noteId);
-            if (noteToDelete != null) {
-                // TODO check if user is really authorized (is his/her note) authentication.getCredentials()
+            if (noteToDelete != null && noteToDelete.getUserId() == currentLoggedInUser.getUserId()) {
                 this.noteService.deleteNote(noteId);
             }
         } catch (JsonSyntaxException e) {

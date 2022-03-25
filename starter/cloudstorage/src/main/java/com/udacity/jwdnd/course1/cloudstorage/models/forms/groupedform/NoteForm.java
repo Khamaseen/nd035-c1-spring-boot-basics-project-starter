@@ -6,12 +6,6 @@ public class NoteForm {
     private String description;
     private Integer userId;
 
-    public NoteForm(Integer noteId, String title, String description) {
-        this.noteId = noteId;
-        this.title = title;
-        this.description = description;
-    }
-
     public NoteForm(Integer noteId, String title, String description, Integer userId) {
         this.noteId = noteId;
         this.title = title;

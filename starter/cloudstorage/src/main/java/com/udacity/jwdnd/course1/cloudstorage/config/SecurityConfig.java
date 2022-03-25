@@ -25,8 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/home", "/home/**", "/signup", "/css/**", "/js/**").permitAll() // TODO mock for development
-//                .antMatchers( "/signup", "/css/**", "/js/**").permitAll() // TODO replace with mock for development
+                .antMatchers( "/signup", "/css/**", "/js/**").permitAll()
                 .anyRequest().authenticated();
 
         http.formLogin()

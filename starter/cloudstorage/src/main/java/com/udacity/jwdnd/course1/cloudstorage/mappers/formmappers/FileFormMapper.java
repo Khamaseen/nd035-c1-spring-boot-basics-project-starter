@@ -22,7 +22,7 @@ public class FileFormMapper {
                 file.getFileSizeInBytes(),
                 this.mapFileSizeInBytesToFileSizeToDisplay(file.getFileSizeInBytes()),
                 file.getFileDataAsBlob(),
-                file.getUserid()
+                file.getUserId()
         );
     }
 

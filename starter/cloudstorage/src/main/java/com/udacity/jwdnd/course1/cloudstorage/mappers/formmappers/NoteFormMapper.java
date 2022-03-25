@@ -13,12 +13,12 @@ public class NoteFormMapper {
         return notes.stream().map(this::mapNoteToNoteForm).toList();
     }
 
-    // TODO add userID
     public NoteForm mapNoteToNoteForm(Note note) {
         return new NoteForm(
                 note.getNoteId(),
                 note.getNoteTitle(),
-                note.getNoteDescription()
+                note.getNoteDescription(),
+                note.getUserId()
         );
     }
 }

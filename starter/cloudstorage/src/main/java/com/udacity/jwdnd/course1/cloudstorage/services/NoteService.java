@@ -23,7 +23,7 @@ public class NoteService {
     public List<NoteForm> getNotes(Integer userId) {
         List<Note> list;
         try {
-            list = this.noteMapper.getNotes();
+            list = this.noteMapper.getNotes(userId);
         } catch (Error e) {
             list = new ArrayList<Note>();
         }

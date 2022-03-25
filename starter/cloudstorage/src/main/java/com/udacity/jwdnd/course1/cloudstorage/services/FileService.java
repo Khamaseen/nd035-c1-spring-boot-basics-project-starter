@@ -25,7 +25,7 @@ public class FileService {
     }
 
     public List<FileForm> getFiles(Integer userId) {
-        List<File> list = this.fileMapper.getFilesFromUser();
+        List<File> list = this.fileMapper.getFilesFromUser(userId);
         if (list == null) {
             list = new ArrayList<File>();
         }

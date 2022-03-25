@@ -2,7 +2,9 @@ package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
 import com.google.gson.JsonSyntaxException;
 import com.udacity.jwdnd.course1.cloudstorage.models.File;
+import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
+import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,12 +15,14 @@ import java.io.InputStream;
 
 @RestController
 @RequestMapping("/home/files")
-public class HomeRestController {
+public class FileRestController {
 
     private FileService fileService;
+    private UserService userService;
 
-    public HomeRestController(FileService fileService) {
+    public FileRestController(FileService fileService, UserService userService) {
         this.fileService = fileService;
+        this.userService = userService;
     }
 
     @GetMapping("/get-file/{fileId}")
@@ -26,7 +30,10 @@ public class HomeRestController {
         try {
             File file = this.fileService.getFile(fileId);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + file.getFileName() + "\""
+                    )
                     .body(file);
         } catch (Error e) {
             System.err.println(e);
@@ -35,8 +42,11 @@ public class HomeRestController {
     }
 
     @PostMapping("/upload-file")
-    public void handleFileUpload(@RequestParam("file") MultipartFile file, Authentication authentication) {
-        if (file.isEmpty()) {
+    public void fileUpload(@RequestParam("file") MultipartFile file, Authentication authentication) {
+        String username = authentication.getName();
+        User currentLoggedInUser = this.userService.getUserByUserName(username);
+
+        if (currentLoggedInUser == null) {
             return;
         }
 
@@ -45,9 +55,13 @@ public class HomeRestController {
             byte[] blob = fis.readAllBytes();
             fis.close();
 
-            //TODO get userID
-            Integer userId = 123;
-            this.fileService.insertFile(file.getOriginalFilename(), file.getSize(), file.getContentType(), userId, blob);
+            this.fileService.insertFile(
+                    file.getOriginalFilename(),
+                    file.getSize(),
+                    file.getContentType(),
+                    currentLoggedInUser.getUserId(),
+                    blob
+            );
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -56,10 +70,16 @@ public class HomeRestController {
 
     @DeleteMapping("/delete-file/{fileId}")
     public void deleteFile(@PathVariable("fileId") Integer fileId, Authentication authentication) {
+        String username = authentication.getName();
+        User currentLoggedInUser = this.userService.getUserByUserName(username);
+
+        if (currentLoggedInUser == null) {
+            return;
+        }
+
         try {
             File fileToDelete = this.fileService.getFile(fileId);
-            if (fileToDelete != null) {
-                // TODO check if user is really authorized (is his/her file) authentication.getCredentials()
+            if (fileToDelete != null && fileToDelete.getUserId() == currentLoggedInUser.getUserId()) {
                 this.fileService.deleteFile(fileId);
             }
         } catch (JsonSyntaxException e) {

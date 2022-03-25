@@ -6,22 +6,23 @@ public class File {
     private String fileType;
     private Long fileSizeInBytes;
     private byte[] fileDataAsBlob;
-    private Integer userid;
+    private Integer userId;
 
-    public File(Integer fileId, Long fileSizeInBytes, String fileName, String fileType, byte[] fileDataAsBlob) {
+    public File(Integer fileId, Long fileSizeInBytes, String fileName, String fileType, byte[] fileDataAsBlob, Integer userId) {
         this.fileId = fileId;
         this.fileSizeInBytes = fileSizeInBytes;
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileDataAsBlob = fileDataAsBlob;
+        this.userId = userId;
     }
 
-    public File(Long fileSizeInBytes, String fileName, String fileType, byte[] fileDataAsBlob, Integer userid) {
+    public File(Long fileSizeInBytes, String fileName, String fileType, byte[] fileDataAsBlob, Integer userId) {
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSizeInBytes = fileSizeInBytes;
         this.fileDataAsBlob = fileDataAsBlob;
-        this.userid = userid;
+        this.userId = userId;
     }
 
     public Integer getFileId() {
@@ -64,11 +65,11 @@ public class File {
         this.fileDataAsBlob = fileDataAsBlob;
     }
 
-    public Integer getUserid() {
-        return userid;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUserid(Integer userid) {
-        this.userid = userid;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

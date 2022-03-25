@@ -26,7 +26,6 @@ public class CredentialService {
         this.encryptionService = encryptionService;
     }
 
-    // TODO returns mock, remove this
     public List<CredentialForm> getCredentialsForUser(Integer userId) {
         List<Credential> list;
         try {

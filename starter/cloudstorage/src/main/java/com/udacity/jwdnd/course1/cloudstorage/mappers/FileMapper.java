@@ -8,18 +8,16 @@ import java.util.List;
 @Mapper
 public interface FileMapper {
 
-    // TODO add user Id
-    @Select("SELECT * FROM FILES")
-    List<File> getFilesFromUser();
+    @Select("SELECT * FROM FILES WHERE userid = #{userId}")
+    List<File> getFilesFromUser(Integer userId);
 
     @Select("SELECT * FROM FILES WHERE fileId = #{fileId}")
     File getFile(Integer fileId);
 
-    // TODO insert user Id
     @Insert("INSERT INTO FILES " +
-            "(filesizeinbytes, filename, filetype, filedata) " +
+            "(filesizeinbytes, filename, filetype, filedata, userid) " +
             "VALUES" +
-            "(#{fileSizeInBytes}, #{fileName}, #{fileType}, #{fileDataAsBlob})")
+            "(#{fileSizeInBytes}, #{fileName}, #{fileType}, #{fileDataAsBlob}, #{userId})")
     @Options(useGeneratedKeys = true, keyProperty = "fileId")
     int insert(File file);
 
