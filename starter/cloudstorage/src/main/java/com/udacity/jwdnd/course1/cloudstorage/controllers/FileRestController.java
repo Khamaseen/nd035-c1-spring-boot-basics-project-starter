@@ -40,7 +40,6 @@ public class FileRestController {
                             "attachment; filename=\"" + file.getFileName() + "\""
                     )
                     .contentLength(bytes.length)
-//                    .contentType(MediaType.APPLICATION_PDF) todo map string to media type??
                     .body(resource);
         } catch (Error e) {
             System.err.println(e);
