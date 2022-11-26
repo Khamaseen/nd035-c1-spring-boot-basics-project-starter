@@ -3,28 +3,12 @@ package com.udacity.jwdnd.course1.cloudstorage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
-/**
- * Write tests for user signup, login, and unauthorized access restrictions.
- * Write a
- * Write a
- *
- * Write tests for note creation, viewing, editing, and deletion.
- * Write a
- * Write a
- * Write a
- *
- * Write tests for credential creation, viewing, editing, and deletion.
- * Write a test that creates a set of credentials, verifies that they are displayed, and verifies that the displayed password is encrypted.
- * Write a test that views an existing set of credentials, verifies that the viewable password is unencrypted, edits the credentials, and verifies that the changes are displayed.
- * Write a test that deletes an existing set of credentials and verifies that the credentials are no longer displayed.
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -36,14 +20,23 @@ class CloudStorageApplicationTests {
 	private SignUpPage signUpPage;
 	private HomePage homePage;
 
+	private String firstName = "firstName";
+	private String lastName = "lastName";
+	private String username = "username";
+	private String password = "passwordOOO";
+
+	private static boolean isSignedUp = false;
+
 	@BeforeAll
 	static void beforeAll() {
-		WebDriverManager.chromedriver().setup();
+		WebDriverManager.firefoxdriver().setup();
 	}
 
 	@BeforeEach
 	public void beforeEach() {
-		this.driver = new ChromeDriver();
+		this.driver = new FirefoxDriver();
+
+		this.signUpUserIfNotExist();
 	}
 
 	@AfterEach
@@ -79,27 +72,12 @@ class CloudStorageApplicationTests {
 	// Test that signs up a new user, logs in, verifies that the home page is accessible, logs out, and verifies that the home page is no longer accessible.
 	@Test
 	public void onlyGetHomePageWhenUserIsAuthorized() {
-		String firstName = "firstName";
-		String lastName = "lastName";
-		String username = "username";
-		String password = "passwordOOO";
-
-		driver.get("http://localhost:" + this.port + "/signup");
-		signUpPage = new SignUpPage(driver);
-		Assertions.assertThrows(NoSuchElementException.class, () -> signUpPage.messageSignUpSuccess.getLocation());
-		signUpPage.SignUp(firstName, lastName, username, password);
-		Assertions.assertTrue(signUpPage.messageSignUpSuccess.isDisplayed());
-
-		driver.get("http://localhost:" + this.port + "/login");
-		loginPage = new LoginPage(driver);
-		loginPage.login(username, password);
-
-		WebDriverWait wait = new WebDriverWait(driver, 10);
-		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		this.login();
 		Assertions.assertEquals("Home", driver.getTitle());
 
 		homePage = new HomePage(driver);
 		homePage.logOut();
+		WebDriverWait wait = new WebDriverWait(driver, 10);
 		wait.until(webDriver -> webDriver.findElement(By.id("login-page-load-marker")));
 		Assertions.assertEquals("Login", driver.getTitle());
 
@@ -111,60 +89,146 @@ class CloudStorageApplicationTests {
 	// Test that creates a note, and verifies it is displayed.
 	@Test
 	public void createNoteByUser() throws InterruptedException {
-		String noteTitle = "noteTitle123";
-		String noteDescription = "noteDescription1234";
+		String noteTitle = "noteTitle123CREATE";
+		String noteDescription = "noteDescription1234CREATE";
 
-		this.signUpAndGoToHome();
+		this.login();
 
 		Assertions.assertEquals("Home", driver.getTitle());
 		HomePage homePage = new HomePage(driver);
 
 		homePage.createNote(noteTitle, noteDescription);
 
-		Thread.sleep(500);
-		driver.navigate().refresh();
 		WebDriverWait wait = new WebDriverWait(driver, 10);
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 
-		Assertions.assertTrue(homePage.findNote(noteTitle, noteDescription));
+		Assertions.assertTrue(homePage.doesNoteExist(noteTitle, noteDescription));
 	}
 
 	// Test that edits an existing note and verifies that the changes are displayed.
 	@Test
-	public void editCreatedNoteAndVerifyChange() {
-		this.signUpAndGoToHome();
+	public void editCreatedNoteAndVerifyChange() throws InterruptedException {
+		String noteTitle = "noteTitle123EDIT";
+		String noteDescription = "noteDescription1234EDIT";
+		String newNoteTitle = "123TitleChangedEDIT";
+		String newNoteDescription = "1234NoteChangedEDIT";
 
-		Assertions.assertEquals("Home", driver.getTitle());
+		this.login();
 		HomePage homePage = new HomePage(driver);
+
+		homePage.createNote(noteTitle, noteDescription);
+
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+
+		homePage.editNote(noteTitle, noteDescription, newNoteTitle, newNoteDescription);
+
+		Assertions.assertTrue(homePage.doesNoteExist(newNoteTitle, newNoteDescription));
 	}
 
 	// Test that deletes a note and verifies that the note is no longer displayed.
 	@Test
-	public void deleteCreatedNoteAndVerifyChange() {
-		this.signUpAndGoToHome();
+	public void deleteCreatedNoteAndVerifyChange() throws InterruptedException {
+		String noteTitle = "noteTitle123DELETE";
+		String noteDescription = "noteDescription1234DELETE";
 
-		Assertions.assertEquals("Home", driver.getTitle());
+		this.login();
 		HomePage homePage = new HomePage(driver);
+
+		homePage.createNote(noteTitle, noteDescription);
+
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		Assertions.assertTrue(homePage.doesNoteExist(noteTitle, noteDescription));
+
+		homePage.deleteNote(noteTitle, noteDescription);
+		Assertions.assertFalse(homePage.doesNoteExist(noteTitle, noteDescription));
 	}
 
-	private void signUpAndGoToHome() {
-		String firstName = "firstName";
-		String lastName = "lastName";
-		String username = "username";
-		String password = "passwordOOO";
+	@Test
+	public void createCredential() throws InterruptedException {
+		String url = "http://thisurl.comCREATE";
+		String userName = "this nameCREATE";
+		String password = "This passwordCREATE";
+
+
+		this.login();
+		HomePage homePage = new HomePage(driver);
+
+		homePage.createCredential(url, userName, password);
+
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
+
+		Assertions.assertTrue(homePage.isPasswordCorrect(url, userName, password));
+	}
+
+	@Test
+	public void editCredential() throws InterruptedException {
+		String url = "http://thisurl.comEDIT";
+		String userName = "this nameEDIT";
+		String password = "This passwordEDIT";
+		String newUrl = "wrongButNewUrlEDIT";
+		String newUserName = "this is a new nameEDIT";
+		String newPassword = "This is a new passwordEDIT";
+
+		this.login();
+
+		HomePage homePage = new HomePage(driver);
+
+		homePage.createCredential(url, userName, password);
+
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
+
+		homePage.editCredential(url, userName, newUrl, newUserName, newPassword);
+
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(newUrl, newUserName, newPassword));
+		Assertions.assertTrue(homePage.isPasswordCorrect(newUrl, newUserName, newPassword));
+	}
+
+	@Test
+	public void deleteCredential() throws InterruptedException {
+		String url = "http://thisurl.comDELETE";
+		String userName = "this nameDELETE";
+		String password = "This passwordDELETE";
+
+		this.login();
+		HomePage homePage = new HomePage(driver);
+
+		homePage.createCredential(url, userName, password);
+
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
+
+		homePage.deleteCredential(url, userName);
+		Assertions.assertFalse(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
+	}
+
+	private void signUpUserIfNotExist() {
+		if (isSignedUp) {
+			return;
+		}
 
 		driver.get("http://localhost:" + this.port + "/signup");
 		signUpPage = new SignUpPage(driver);
-		signUpPage.SignUp(firstName, lastName, username, password);
+		signUpPage.SignUp(this.firstName, this.lastName, this.username, this.password);
 		WebDriverWait waitSignUp = new WebDriverWait(driver, 10);
 		waitSignUp.until(webDriver -> webDriver.findElement(By.id("messageSignUpSuccess")));
+		isSignedUp = true;
+	}
 
+	private void login() {
 		driver.get("http://localhost:" + this.port + "/login");
 		loginPage = new LoginPage(driver);
-		loginPage.login(username, password);
+		loginPage.login(this.username, this.password);
 
-		WebDriverWait waitHome = new WebDriverWait(driver, 10);
-		waitHome.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 	}
 
 }

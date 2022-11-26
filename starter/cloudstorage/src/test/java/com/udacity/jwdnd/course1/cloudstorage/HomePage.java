@@ -1,7 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -22,38 +21,37 @@ public class HomePage {
     @FindBy(id = "addNewNoteButton")
     public WebElement addNewNoteButton;
 
-    @FindBy(id = "modalSubmitButton")
-    public WebElement modalSubmitButton;
-
     @FindBy(id = "note-title")
     public WebElement modalNoteTitle;
 
     @FindBy(id = "note-description")
     public WebElement modalNoteDescription;
 
-    // Credentials TODO
-    @FindBy(id = "notesTab")
+    @FindBy(id = "modalSubmitButton")
+    public WebElement modalSubmitNoteButton;
+
+    // Credentials
+    @FindBy(id = "nav-credentials-tab")
     public WebElement credentialsTab;
-    @FindBy(id = "credentialsList")
-    public WebElement credentialsList;
-    @FindBy(id = "addNote")
-    public WebElement addCredential;
-    @FindBy(id = "editNote") // Get from credentialsList
-    public WebElement editCredential;
-    @FindBy(id = "deleteNote") // Get from credentialsList
-    public WebElement deleteCredendial;
-    @FindBy(id = "modalEdit")
-    public WebElement modalEditCredential;
-    @FindBy(id = "modalCancel")
-    public WebElement modalCancelCredential;
-    @FindBy(id = "modalCredentialUrl")
+
+    @FindBy(id = "addNewCredentialButton")
+    public WebElement addNewCredentialButton;
+
+    @FindBy(id = "credential-url")
     public WebElement modalCredentialUrl;
-    @FindBy(id = "modalCredentialUsername")
+
+    @FindBy(id = "credential-username")
     public WebElement modalCredentialUsername;
-    @FindBy(id = "modalCredentialPassword")
+
+    @FindBy(id = "credential-password")
     public WebElement modalCredentialPassword;
 
+    @FindBy(id = "modalSubmitCredential")
+    public WebElement modalSubmitCredentialButton;
+
+
     private WebDriver webDriver;
+
     public HomePage(WebDriver webDriver) {
         this.webDriver = webDriver;
         PageFactory.initElements(webDriver, this);
@@ -64,37 +62,38 @@ public class HomePage {
         logoutButton.submit();
     }
 
-    // Tests for notes
-    public void createNote(String title, String description) throws InterruptedException {
+    public void goToNotesTab() throws InterruptedException {
         notesTab.click();
         Thread.sleep(500);
+    }
+
+    public void gotToCredentialsTab() throws InterruptedException {
+        credentialsTab.click();
+        Thread.sleep(500);
+    }
+
+    // Tests for notes
+    public void createNote(String title, String description) throws InterruptedException {
+        this.goToNotesTab();
         addNewNoteButton.click();
         Thread.sleep(500);
         modalNoteTitle.sendKeys(title);
         Thread.sleep(500);
         modalNoteDescription.sendKeys(description);
-
-        JavascriptExecutor jse = (JavascriptExecutor) this.webDriver;
-        jse.executeScript("document.getElementById('modalSubmitButton').focus();");
-
-        Thread.sleep(6500);
-        modalSubmitButton.click();
-        Thread.sleep(6500);
+        Thread.sleep(500);
+        modalSubmitNoteButton.click();
+        Thread.sleep(2000);
     }
 
-    public boolean findNote(String title, String description) throws InterruptedException {
-        Thread.sleep(500);
-        notesTab.click();
-        Thread.sleep(500);
+    public boolean doesNoteExist(String title, String description) throws InterruptedException {
+        this.goToNotesTab();
 
         List<WebElement> rows = this.webDriver.findElements(By.tagName("tr"));
         Thread.sleep(500);
-        for (WebElement row : rows)
-        {
+        for (WebElement row : rows) {
             List<WebElement> cellsTh = row.findElements(By.tagName("th"));
             List<WebElement> cellsTd = row.findElements(By.tagName("td"));
-            if (cellsTh.get(0).getText().equals(title))
-            {
+            if (cellsTh.get(0).getText().equals(title)) {
                 if (cellsTd.get(1).getText().equals(description)) {
                     return true;
                 }
@@ -104,28 +103,159 @@ public class HomePage {
         return false;
     }
 
-    public void editNote(String previousTitle, String previousDescription, String newTitle, String newDescription) {
-        //
+    public WebElement findEditButtonForNote(String title, String description) throws InterruptedException {
+        this.goToNotesTab();
+
+        List<WebElement> rows = this.webDriver.findElements(By.tagName("tr"));
+        Thread.sleep(500);
+        for (WebElement row : rows) {
+            List<WebElement> cellsTh = row.findElements(By.tagName("th"));
+            List<WebElement> cellsTd = row.findElements(By.tagName("td"));
+            if (cellsTh.get(0).getText().equals(title)) {
+                if (cellsTd.get(1).getText().equals(description)) {
+                    return row.findElements(By.className("btn-success")).get(0);
+                }
+            }
+        }
+
+        return null;
     }
 
-    public void deleteNote(String title, String description) {
-        //
+    public WebElement findDeleteButtonForNote(String title, String description) throws InterruptedException {
+        this.goToNotesTab();
+
+        List<WebElement> rows = this.webDriver.findElements(By.tagName("tr"));
+        Thread.sleep(500);
+        for (WebElement row : rows) {
+            List<WebElement> cellsTh = row.findElements(By.tagName("th"));
+            List<WebElement> cellsTd = row.findElements(By.tagName("td"));
+            if (cellsTh.get(0).getText().equals(title)) {
+                if (cellsTd.get(1).getText().equals(description)) {
+                    return row.findElements(By.className("btn-danger")).get(0);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void editNote(String previousTitle, String previousDescription, String newTitle, String newDescription) throws InterruptedException {
+        WebElement editButton = this.findEditButtonForNote(previousTitle, previousDescription);
+        editButton.click();
+        Thread.sleep(500);
+
+        modalNoteTitle.clear();
+        modalNoteTitle.sendKeys(newTitle);
+        Thread.sleep(500);
+
+        modalNoteDescription.clear();
+        modalNoteDescription.sendKeys(newDescription);
+        Thread.sleep(500);
+
+        modalSubmitNoteButton.click();
+        Thread.sleep(2000);
+    }
+
+    public void deleteNote(String title, String description) throws InterruptedException {
+        WebElement deleteButtonForNote = this.findDeleteButtonForNote(title, description);
+        deleteButtonForNote.click();
+        Thread.sleep(500);
     }
 
     // Tests for credentials
-    public void createCredential(String url, String username, String password) {
-        //
+    public void createCredential(String url, String username, String password) throws InterruptedException {
+        this.gotToCredentialsTab();
+
+        addNewCredentialButton.click();
+        Thread.sleep(500);
+        modalCredentialUrl.sendKeys(url);
+        Thread.sleep(500);
+        modalCredentialUsername.sendKeys(username);
+        Thread.sleep(500);
+        modalCredentialPassword.sendKeys(password);
+        Thread.sleep(500);
+        modalSubmitCredentialButton.click();
+        Thread.sleep(2000);
     }
 
-    public boolean findCredential(String url, String username) {
-        return true; //
+    public boolean doesCredentialExistWithEncryptedPassword(String url, String username, String password) throws InterruptedException {
+        this.gotToCredentialsTab();
+
+        List<WebElement> rows = this.webDriver.findElements(By.tagName("tr"));
+        Thread.sleep(500);
+        for (WebElement row : rows) {
+            List<WebElement> cellsTh = row.findElements(By.tagName("th"));
+            List<WebElement> cellsTd = row.findElements(By.tagName("td"));
+            if (cellsTh.get(0).getText().equals(url)) {
+                if (cellsTd.get(1).getText().equals(username) && !cellsTd.get(2).getText().equals(password)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
-    public void editCredential(String url, String username, String newUrl, String newUsername, String newPassword) {
-        //
+    public WebElement findCredentialRow(String url, String username) throws InterruptedException {
+        this.gotToCredentialsTab();
+
+        List<WebElement> rows = this.webDriver.findElements(By.tagName("tr"));
+        Thread.sleep(500);
+        for (WebElement row : rows) {
+            List<WebElement> cellsTh = row.findElements(By.tagName("th"));
+            List<WebElement> cellsTd = row.findElements(By.tagName("td"));
+            if (cellsTh.get(0).getText().equals(url)) {
+                if (cellsTd.get(1).getText().equals(username)) {
+                    return row;
+                }
+            }
+        }
+
+        return null;
     }
 
-    public void deleteCredential(String url, String username) {
-        //
+    public boolean isPasswordCorrect(String url, String username, String password) throws InterruptedException {
+        this.gotToCredentialsTab();
+
+        WebElement row = this.findCredentialRow(url, username);
+        WebElement btnEdit = row.findElements(By.className("btn-success")).get(0);
+
+        btnEdit.click();
+
+        return this.modalCredentialPassword.getAttribute("value").equals(password);
+    }
+
+
+    public void editCredential(String url, String username, String newUrl, String newUsername, String newPassword) throws InterruptedException {
+        this.gotToCredentialsTab();
+
+        WebElement row = this.findCredentialRow(url, username);
+        WebElement btnEdit = row.findElements(By.className("btn-success")).get(0);
+
+        btnEdit.click();
+
+        modalCredentialUrl.clear();
+        modalCredentialUrl.sendKeys(newUrl);
+        Thread.sleep(500);
+
+        modalCredentialUsername.clear();
+        modalCredentialUsername.sendKeys(newUsername);
+        Thread.sleep(500);
+
+        modalCredentialPassword.clear();
+        modalCredentialPassword.sendKeys(newPassword);
+        Thread.sleep(500);
+
+        modalSubmitCredentialButton.click();
+        Thread.sleep(2000);
+    }
+
+    public void deleteCredential(String url, String username) throws InterruptedException {
+        this.gotToCredentialsTab();
+
+        WebElement row = this.findCredentialRow(url, username);
+        WebElement btnDelete = row.findElements(By.className("btn-danger")).get(0);
+
+        btnDelete.click();
     }
 }

@@ -35,7 +35,7 @@ public class HomeController {
         if (currentLoggedInUser == null) {
             return "redirect:login";
         }
-        
+
         Integer userId = currentLoggedInUser.getUserId();
         model.addAttribute("fileForms", this.fileService.getFiles(userId));
         model.addAttribute("noteForms", this.noteService.getNotes(userId));

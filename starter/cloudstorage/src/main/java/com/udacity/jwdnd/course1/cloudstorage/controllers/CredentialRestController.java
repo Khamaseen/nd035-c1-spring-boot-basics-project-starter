@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/home/credentials")
 public class CredentialRestController {
-    
+
     private final CredentialService credentialService;
     private final UserService userService;
 

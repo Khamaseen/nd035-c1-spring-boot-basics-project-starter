@@ -5,12 +5,14 @@ import com.udacity.jwdnd.course1.cloudstorage.models.File;
 import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 @RestController
@@ -29,12 +31,17 @@ public class FileRestController {
     public ResponseEntity downloadFile(@PathVariable("fileId") Integer fileId, Authentication authentication) {
         try {
             File file = this.fileService.getFile(fileId);
+
+            byte[] bytes = file.getFileDataAsBlob();
+            InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(bytes));
             return ResponseEntity.ok()
                     .header(
                             HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + file.getFileName() + "\""
                     )
-                    .body(file);
+                    .contentLength(bytes.length)
+//                    .contentType(MediaType.APPLICATION_PDF) todo map string to media type??
+                    .body(resource);
         } catch (Error e) {
             System.err.println(e);
             return ResponseEntity.internalServerError().body(new Object());
@@ -79,7 +86,7 @@ public class FileRestController {
 
         try {
             File fileToDelete = this.fileService.getFile(fileId);
-            if (fileToDelete != null && fileToDelete.getUserId() == currentLoggedInUser.getUserId()) {
+            if (fileToDelete != null && fileToDelete.getUserId().equals(currentLoggedInUser.getUserId())) {
                 this.fileService.deleteFile(fileId);
             }
         } catch (JsonSyntaxException e) {
