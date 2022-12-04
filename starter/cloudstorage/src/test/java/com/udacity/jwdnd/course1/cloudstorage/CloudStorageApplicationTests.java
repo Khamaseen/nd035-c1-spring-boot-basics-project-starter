@@ -100,6 +100,10 @@ class CloudStorageApplicationTests {
 		homePage.createNote(noteTitle, noteDescription);
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 
 		Assertions.assertTrue(homePage.doesNoteExist(noteTitle, noteDescription));
@@ -119,9 +123,19 @@ class CloudStorageApplicationTests {
 		homePage.createNote(noteTitle, noteDescription);
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 
 		homePage.editNote(noteTitle, noteDescription, newNoteTitle, newNoteDescription);
+
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 
 		Assertions.assertTrue(homePage.doesNoteExist(newNoteTitle, newNoteDescription));
 	}
@@ -138,10 +152,20 @@ class CloudStorageApplicationTests {
 		homePage.createNote(noteTitle, noteDescription);
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertTrue(homePage.doesNoteExist(noteTitle, noteDescription));
 
 		homePage.deleteNote(noteTitle, noteDescription);
+
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertFalse(homePage.doesNoteExist(noteTitle, noteDescription));
 	}
 
@@ -158,6 +182,10 @@ class CloudStorageApplicationTests {
 		homePage.createCredential(url, userName, password);
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
 
@@ -180,10 +208,18 @@ class CloudStorageApplicationTests {
 		homePage.createCredential(url, userName, password);
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
 
 		homePage.editCredential(url, userName, newUrl, newUserName, newPassword);
+
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
 
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(newUrl, newUserName, newPassword));
@@ -202,10 +238,20 @@ class CloudStorageApplicationTests {
 		homePage.createCredential(url, userName, password);
 
 		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
 		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertTrue(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
 
 		homePage.deleteCredential(url, userName);
+
+		wait.until(webDriver -> webDriver.findElement(By.id("success-page-load-marker")));
+		driver.get("http://localhost:" + this.port + "/home");
+
+
+		wait.until(webDriver -> webDriver.findElement(By.id("home-page-load-marker")));
 		Assertions.assertFalse(homePage.doesCredentialExistWithEncryptedPassword(url, userName, password));
 	}
 

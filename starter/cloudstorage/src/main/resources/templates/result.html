@@ -13,10 +13,12 @@
             <div class="alert alert-success fill-parent" th:if="${successMessage}">
                 <h1 class="display-5">Success</h1>
                 <span th:text="${successMessage}">Your changes were successfully saved. </span> <span>Click <a href="/home">here</a> to continue.</span>
+                <div id="success-page-load-marker" style="visibility: hidden"></div>
             </div>
             <div class="alert alert-danger fill-parent" th:if="${errorMessage}">
                 <h1 class="display-5">Error</h1>
                 <span th:text="${errorMessage}">Your changes were not saved.</span> <span>Click <a href="/home">here</a> to continue.</span>
+                <div id="error-page-load-marker" style="visibility: hidden"></div>
             </div>
         </div>
     </body>
