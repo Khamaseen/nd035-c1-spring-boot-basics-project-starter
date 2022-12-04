@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import static com.udacity.jwdnd.course1.cloudstorage.utils.EscapeString.escape;
+
 @Controller
 public class NoteRestController {
 
@@ -38,6 +40,9 @@ public class NoteRestController {
 
             return "result";
         }
+
+        note.setNoteDescription(escape(note.getNoteDescription()));
+        note.setNoteTitle(escape(note.getNoteTitle()));
 
         if (note.getNoteId() != null) {
             this.noteService.updateNote(note.getNoteId(), note.getNoteTitle(), note.getNoteDescription(), currentLoggedInUser.getUserId());

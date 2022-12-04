@@ -1,18 +1,16 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.udacity.jwdnd.course1.cloudstorage.models.Credential;
-import com.udacity.jwdnd.course1.cloudstorage.models.Note;
 import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform.CredentialForm;
-import com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import static com.udacity.jwdnd.course1.cloudstorage.utils.EscapeString.escape;
 
@@ -41,6 +39,10 @@ public class CredentialRestController {
 
             return "result";
         }
+
+        credential.setPassword(escape(credential.getPassword()));
+        credential.setUsername(escape(credential.getUsername()));
+        credential.setUrl(escape(credential.getUrl()));
 
         if (credential.getCredentialId() != null) {
             this.credentialService.updateCredential(
