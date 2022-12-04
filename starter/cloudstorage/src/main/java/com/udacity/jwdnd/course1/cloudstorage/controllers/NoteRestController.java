@@ -24,7 +24,7 @@ public class NoteRestController {
         this.userService = userService;
     }
 
-    @PostMapping("/upload/note")
+    @PostMapping("/upload-note")
     public String noteUpload(@ModelAttribute Note note, Authentication authentication, Model model) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);

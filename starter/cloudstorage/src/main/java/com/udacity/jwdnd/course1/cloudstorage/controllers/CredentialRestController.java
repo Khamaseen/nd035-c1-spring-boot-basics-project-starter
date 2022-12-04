@@ -27,7 +27,7 @@ public class CredentialRestController {
         this.userService = userService;
     }
 
-    @PostMapping("/upload/credential")
+    @PostMapping("/upload-credential")
     public String credentialUpload(@ModelAttribute Credential credential, Authentication authentication, Model redirectAttrs) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);

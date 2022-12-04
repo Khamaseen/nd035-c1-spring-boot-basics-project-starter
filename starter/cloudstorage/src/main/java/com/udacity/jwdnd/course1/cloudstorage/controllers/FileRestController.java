@@ -9,6 +9,8 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -16,8 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-@RestController
-@RequestMapping("/home/files")
+@Controller
 public class FileRestController {
 
     private FileService fileService;
@@ -28,7 +29,7 @@ public class FileRestController {
         this.userService = userService;
     }
 
-    @GetMapping("/get-file/{fileId}")
+    @GetMapping("/files/get-file/{fileId}")
     public ResponseEntity downloadFile(@PathVariable("fileId") Integer fileId, Authentication authentication) {
         try {
             File file = this.fileService.getFile(fileId);
@@ -49,12 +50,18 @@ public class FileRestController {
     }
 
     @PostMapping("/upload-file")
-    public void fileUpload(@RequestParam("file") MultipartFile file, Authentication authentication, RedirectAttributes redirectAttrs) {
+    public String fileUpload(@RequestParam("fileUpload") MultipartFile file,  Authentication authentication, Model model) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            return;
+            return "login";
+        }
+
+        if (this.fileService.getFileByName(file.getName()) != null) {
+            model.addAttribute("errorMessage", "File name already exists. Try to upload a it with another name.");
+
+            return "result";
         }
 
         try {
@@ -71,17 +78,24 @@ public class FileRestController {
             );
         } catch (Exception e) {
             System.err.println(e);
+
+            model.addAttribute("errorMessage", "Could not upload the file, something went wrong");
+
+            return "result";
         }
 
+        model.addAttribute("successMessage", "File successfully uploaded");
+
+        return "result";
     }
 
-    @DeleteMapping("/delete-file/{fileId}")
-    public void deleteFile(@PathVariable("fileId") Integer fileId, Authentication authentication, RedirectAttributes redirectAttrs) {
+    @PostMapping("/delete-file/{fileId}")
+    public String deleteFile(@PathVariable("fileId") Integer fileId, Authentication authentication, Model model) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            return;
+            return "login";
         }
 
         try {
@@ -91,7 +105,14 @@ public class FileRestController {
             }
         } catch (JsonSyntaxException e) {
             System.err.println(e);
+            model.addAttribute("errorMessage", "Couldn't delete the file, please try again.");
+
+            return "result";
         }
+
+        model.addAttribute("successMessage", "Successfully deleted a file.");
+
+        return "result";
     }
 
 }

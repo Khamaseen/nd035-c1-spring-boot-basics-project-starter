@@ -27,7 +27,7 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-files" role="tabpanel" aria-labelledby="nav-files-tab">
-                        <form id="formFileUpload" action="#" enctype="multipart/form-data" method="POST" th:action="@{'/home'}">
+                        <form id="formFileUpload" action="#" enctype="multipart/form-data" method="POST" th:action="@{/upload-file}">
                             <div class="container">
                                 <div class="row" style="margin: 1em;">
                                     <div class="col-sm-2">
@@ -38,7 +38,7 @@
                                                 type="hidden"
                                                 th:name="${_csrf.parameterName}"
                                                 th:value="${_csrf.token}" />
-                                        <input type="file" class="form-control-file" id="fileUpload" name="file">
+                                        <input type="file" class="form-control-file" id="fileUpload" name="fileUpload">
                                     </div>
                                     <div class="col-sm-4">
                                         <button id="submitFile" type="submit" class="btn btn-dark">Upload</button>
@@ -69,10 +69,9 @@
                                                this.getAttribute('data-parameter2')
                                                )"
                                         >Download</a>
-                                        <a  class="btn btn-danger"
-                                            th:data-parameter1="${fileForm.fileId}"
-                                            onclick="deleteEntity(this.getAttribute('data-parameter1'), 'FILE');"
-                                        >Delete</a>
+                                        <form action="#" th:action="@{/delete-file/{fileId}(fileId=${fileForm.fileId})}" method="POST">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
                                     </td>
                                     <th scope="row" th:text="${fileForm.fileName}">ExampleFile.txt</th>
                                 </tr>
@@ -123,7 +122,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="formNoteUpload" action="#" method="POST" th:action="@{/upload/note}" th:object="${note}" > <!-- th:field="*{noteTitle}" -->
+                                        <form id="formNoteUpload" action="#" method="POST" th:action="@{/upload-note}" th:object="${note}" > <!-- th:field="*{noteTitle}" -->
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
@@ -173,7 +172,7 @@
                                                     this.getAttribute('data-parameter3'),
                                                     this.getAttribute('data-parameter4'));"
                                         >Edit</button>
-                                        <form action="#" th:action="@{/delete-credential/{noteId}(noteId=${credentialForm.credentialId})}" method="POST">
+                                        <form action="#" th:action="@{/delete-credential/{credentialId}(credentialId=${credentialForm.credentialId})}" method="POST">
                                             <button type="submit" class="btn btn-danger">Delete</button>
                                         </form>
                                     </td>
@@ -195,7 +194,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="formCredentialUpload" action="#" method="POST" th:action="@{/upload/credential}" th:object="${credential}" > <!-- th:field="*{noteTitle}" -->
+                                        <form id="formCredentialUpload" action="#" method="POST" th:action="@{/upload-credential}" th:object="${credential}" > <!-- th:field="*{noteTitle}" -->
                                             <input type="hidden" name="credentialId" id="credential-id">
                                             <div class="form-group">
                                                 <label for="credential-url" class="col-form-label">URL</label>
@@ -268,10 +267,10 @@
                 $('#credentialModal').modal('show');
             }
 
-            const submitFile = document.querySelector('#submitFile');
-            const submitNote = document.querySelector('#submitNote');
+            // const submitFile = document.querySelector('#submitFile');
+            // const submitNote = document.querySelector('#submitNote');
             // const submitCredential = document.querySelector('#submitCredential');
-            submitFile.addEventListener('click', (event) => postFromForm(event, 'formFileUpload', 'FILE'));
+            // submitFile.addEventListener('click', (event) => postFromForm(event, 'formFileUpload', 'FILE'));
             // submitNote.addEventListener('click', (event) => postFromForm(event, 'formNoteUpload', 'NOTE'));
             // submitCredential.addEventListener('click', (event) => postFromForm(event, 'formCredentialUpload', 'CREDENTIAL'));
 

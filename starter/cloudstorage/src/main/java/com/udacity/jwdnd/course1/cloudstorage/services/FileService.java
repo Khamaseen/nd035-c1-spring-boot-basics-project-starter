@@ -24,6 +24,10 @@ public class FileService {
         return this.fileMapper.getFile(fileId);
     }
 
+    public File getFileByName(String fileName) {
+        return this.fileMapper.getFileByName(fileName);
+    }
+
     public List<FileForm> getFiles(Integer userId) {
         List<File> list = this.fileMapper.getFilesFromUser(userId);
         if (list == null) {
