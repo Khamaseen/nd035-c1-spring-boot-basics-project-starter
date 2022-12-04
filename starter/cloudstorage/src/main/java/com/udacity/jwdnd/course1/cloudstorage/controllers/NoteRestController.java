@@ -25,12 +25,16 @@ public class NoteRestController {
     }
 
     @PostMapping("/upload/note")
-    public String noteUpload(@ModelAttribute Note note, Authentication authentication, Model redirectAttributes) {
+    public String noteUpload(@ModelAttribute Note note, Authentication authentication, Model model) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            redirectAttributes.addAttribute("errorMessage", "No currently logged in user.");
+            return "/login";
+        }
+
+        if (note.getNoteTitle() == null || note.getNoteDescription() == null) {
+            model.addAttribute("errorMessage", "Data was invalid or missing properties");
 
             return "result";
         }
@@ -39,45 +43,40 @@ public class NoteRestController {
             this.noteService.updateNote(note.getNoteId(), note.getNoteTitle(), note.getNoteDescription(), currentLoggedInUser.getUserId());
         } else {
             if (this.noteService.getNoteByTitle(note.getNoteTitle()) != null) {
-                redirectAttributes.addAttribute("errorMessage", "Note title already exists.");
+                model.addAttribute("errorMessage", "Note title already exists.");
 
                 return "result";
             }
             this.noteService.insertNote(note.getNoteTitle(), note.getNoteDescription(), currentLoggedInUser.getUserId());
         }
 
-        redirectAttributes.addAttribute("successMessage", "Note successfully saved.");
+        model.addAttribute("successMessage", "Note successfully saved.");
 
         return "result";
     }
 
     @PostMapping("/delete-note/{noteId}")
-    public String deleteNote(@PathVariable("noteId") Integer noteId, Authentication authentication, Model redirectAttrs) {
+    public String deleteNote(@PathVariable("noteId") Integer noteId, Authentication authentication, Model model) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            redirectAttrs.addAttribute("errorMessage", "No currently logged in user.");
+            return "/login";
+        }
+
+        NoteForm noteToDelete = this.noteService.getNote(noteId);
+        if (noteToDelete == null || noteToDelete.getUserId() != currentLoggedInUser.getUserId()) {
+            model.addAttribute("errorMessage", "Something went wrong while deleting a note. Please try again.");
 
             return "result";
         }
 
-        try {
-            NoteForm noteToDelete = this.noteService.getNote(noteId);
-            if (noteToDelete != null && noteToDelete.getUserId() == currentLoggedInUser.getUserId()) {
-                this.noteService.deleteNote(noteId);
-            }
-        } catch (JsonSyntaxException e) {
-            System.err.println(e);
+        this.noteService.deleteNote(noteId);
 
-            redirectAttrs.addAttribute("errorMessage", "Something went wrong while deleting a note. Please try again.");
-
-            return "result";
-        }
-
-        redirectAttrs.addAttribute("successMessage", "Note successfully deleted.");
+        model.addAttribute("successMessage", "Note successfully deleted.");
 
         return "result";
+
     }
 
 }
