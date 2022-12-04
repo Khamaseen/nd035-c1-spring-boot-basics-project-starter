@@ -40,6 +40,16 @@ public class NoteService {
         return null;
     }
 
+    public NoteForm getNoteByTitle(String noteTitle) {
+        Note note = this.noteMapper.getNoteByTitle(noteTitle);
+
+        if (note != null) {
+            return this.noteFormMapper.mapNoteToNoteForm(note);
+        }
+
+        return null;
+    }
+
     public int updateNote(Integer noteId, String title, String description, Integer userId) {
         Note newNote = new Note(
                 noteId,

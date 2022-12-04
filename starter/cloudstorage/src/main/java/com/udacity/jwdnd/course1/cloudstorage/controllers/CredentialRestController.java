@@ -7,7 +7,10 @@ import com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform.Credentia
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import static com.udacity.jwdnd.course1.cloudstorage.utils.EscapeString.escape;
 
 @RestController
 @RequestMapping("/home/credentials")
@@ -22,19 +25,21 @@ public class CredentialRestController {
     }
 
     @PostMapping("/upload-credential")
-    public void credentialUpload(@RequestBody() String data, Authentication authentication) {
+    public String credentialUpload(@RequestBody() String data, Authentication authentication, Model redirectAttrs) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            return;
+            return "redirect:/login";
         }
 
         try {
             Gson gson = new Gson();
-            CredentialRestController.JSONCredentialData jsonCredentialData = gson.fromJson(data, CredentialRestController.JSONCredentialData.class);
+            CredentialRestController.JSONCredentialData jsonCredentialData = gson.fromJson(escape(data), CredentialRestController.JSONCredentialData.class);
             if (jsonCredentialData.url == null || jsonCredentialData.username == null || jsonCredentialData.password == null) {
-                return;
+                redirectAttrs.addAttribute("errorMessage", "Error: data was invalid or missing properties");
+
+                return "result";
             }
 
             if (jsonCredentialData.credentialId != null && !jsonCredentialData.credentialId.trim().isEmpty()) {
@@ -48,6 +53,8 @@ public class CredentialRestController {
                             jsonCredentialData.password,
                             currentLoggedInUser.getUserId()
                     );
+
+                    redirectAttrs.addAttribute("successMessage", "Successfully updated the credential");
                 }
 
             } else {
@@ -57,19 +64,29 @@ public class CredentialRestController {
                         jsonCredentialData.password,
                         currentLoggedInUser.getUserId()
                 );
+
+                redirectAttrs.addAttribute("successMessage", "Success created a new credential");
             }
         } catch (Exception e) {
             System.err.println(e);
+            redirectAttrs.addAttribute("errorMessage", "Error: something went wrong, please try again.");
+
+            return "result";
         }
+
+        redirectAttrs.addAttribute("successMessage", "Success uploaded the credentials");
+
+        System.out.println("SHOULD REDIRECT TO RESULT");
+        return "result";
     }
 
     @DeleteMapping("/delete-credential/{credentialId}")
-    public void deletecredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication) {
+    public String deletecredential(@PathVariable("credentialId") Integer credentialId, Authentication authentication, Model redirectAttrs) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            return;
+            return "redirect:/login";
         }
 
         try {
@@ -77,9 +94,17 @@ public class CredentialRestController {
             if (credentialToDelete != null && credentialToDelete.getUserId() == currentLoggedInUser.getUserId()) {
                 this.credentialService.deleteCredential(credentialId);
             }
+            redirectAttrs.addAttribute("successMessage", "Successfully deleted the credential.");
+
         } catch (JsonSyntaxException e) {
             System.err.println(e);
+            redirectAttrs.addAttribute("errorMessage", "Error: something went wrong, please try again");
+
+            return "result";
         }
+
+        System.out.println("SHOULD REDIRECT TO RESULT");
+        return "result";
     }
 
     class JSONCredentialData {

@@ -102,10 +102,9 @@
                                                     th:data-parameter2="${noteForm.title}"
                                                     th:data-parameter3="${noteForm.description}"
                                                     onclick="showNoteModal(this.getAttribute('data-parameter1'), this.getAttribute('data-parameter2'), this.getAttribute('data-parameter3'));">Edit</button>
-                                            <a class="btn btn-danger"
-                                               th:data-parameter1="${noteForm.noteId}"
-                                               onclick="deleteEntity(this.getAttribute('data-parameter1'), 'NOTE');"
-                                            >Delete</a>
+                                            <form action="#" th:action="@{/delete-note/{noteId}(noteId=${noteForm.noteId})}" method="POST">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
                                         </td>
                                         <th scope="row" th:text="${noteForm.title}">Example Note Title</th>
                                         <td th:text="${noteForm.description}">Example Note Description </td>
@@ -124,7 +123,7 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="formNoteUpload" action="#" method="POST">
+                                        <form id="formNoteUpload" action="#" method="POST" th:action="@{/upload/note}" th:object="${note}" > <!-- th:field="*{noteTitle}" -->
                                             <input type="hidden" name="noteId" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
@@ -231,7 +230,7 @@
         <script th:src="@{/js/bootstrap.min.js}"></script>
 
         <script type="text/javascript">
-            const BASE_URL = '/home';
+            const BASE_URL = '';
             const POST = {
                 CREDENTIALS: '/credentials/upload-credential',
                 FILE: '/files/upload-file',
@@ -241,7 +240,7 @@
             const DELETE = {
                 CREDENTIALS: '/credentials/delete-credential/{id}',
                 FILE: '/files/delete-file/{id}',
-                NOTE: '/notes/delete-note/{id}',
+                NOTE: '/delete-note/{id}',
             }
 
             const GET = {
@@ -274,10 +273,11 @@
             const submitNote = document.querySelector('#submitNote');
             const submitCredential = document.querySelector('#submitCredential');
             submitFile.addEventListener('click', (event) => postFromForm(event, 'formFileUpload', 'FILE'));
-            submitNote.addEventListener('click', (event) => postFromForm(event, 'formNoteUpload', 'NOTE'));
+            // submitNote.addEventListener('click', (event) => postFromForm(event, 'formNoteUpload', 'NOTE'));
             submitCredential.addEventListener('click', (event) => postFromForm(event, 'formCredentialUpload', 'CREDENTIAL'));
 
             function postFromForm(event, formId, entityType) {
+                console.log("post form with XML")
                 event.preventDefault();
                 event.stopPropagation();
 
@@ -361,7 +361,7 @@
             }
 
             function refreshPage() {
-                window.location.reload();
+                // window.location.reload();
             }
 
         </script>

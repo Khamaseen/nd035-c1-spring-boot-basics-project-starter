@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -48,7 +49,7 @@ public class FileRestController {
     }
 
     @PostMapping("/upload-file")
-    public void fileUpload(@RequestParam("file") MultipartFile file, Authentication authentication) {
+    public void fileUpload(@RequestParam("file") MultipartFile file, Authentication authentication, RedirectAttributes redirectAttrs) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
@@ -75,7 +76,7 @@ public class FileRestController {
     }
 
     @DeleteMapping("/delete-file/{fileId}")
-    public void deleteFile(@PathVariable("fileId") Integer fileId, Authentication authentication) {
+    public void deleteFile(@PathVariable("fileId") Integer fileId, Authentication authentication, RedirectAttributes redirectAttrs) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 

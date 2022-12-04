@@ -1,16 +1,19 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.udacity.jwdnd.course1.cloudstorage.models.Note;
 import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.models.forms.groupedform.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.services.NoteService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
-@RestController
-@RequestMapping("/home/notes")
+@Controller
 public class NoteRestController {
 
     private final UserService userService;
@@ -21,44 +24,42 @@ public class NoteRestController {
         this.userService = userService;
     }
 
-    @PostMapping("/upload-note")
-    public void noteUpload(@RequestBody() String data, Authentication authentication) {
+    @PostMapping("/upload/note")
+    public String noteUpload(@ModelAttribute Note note, Authentication authentication, Model redirectAttributes) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            return;
+            redirectAttributes.addAttribute("errorMessage", "No currently logged in user.");
+
+            return "result";
         }
 
-        try {
-            Gson gson = new Gson();
-            JSONNoteData jsonNoteData = gson.fromJson(data, JSONNoteData.class);
-            if (jsonNoteData.noteTitle == null || jsonNoteData.noteDescription == null) {
-                return;
-            }
+        if (note.getNoteId() != null) {
+            this.noteService.updateNote(note.getNoteId(), note.getNoteTitle(), note.getNoteDescription(), currentLoggedInUser.getUserId());
+        } else {
+            if (this.noteService.getNoteByTitle(note.getNoteTitle()) != null) {
+                redirectAttributes.addAttribute("errorMessage", "Note title already exists.");
 
-            if (jsonNoteData.noteId != null && !jsonNoteData.noteId.trim().isEmpty()) {
-                Integer noteId = Integer.valueOf(jsonNoteData.noteId);
-                NoteForm previousVersionNote = this.noteService.getNote(noteId);
-                if (previousVersionNote.getUserId() == currentLoggedInUser.getUserId()) {
-                    this.noteService.updateNote(noteId, jsonNoteData.noteTitle, jsonNoteData.noteDescription, currentLoggedInUser.getUserId());
-                }
-
-            } else {
-                this.noteService.insertNote(jsonNoteData.noteTitle, jsonNoteData.noteDescription, currentLoggedInUser.getUserId());
+                return "result";
             }
-        } catch (Exception e) {
-            System.err.println(e);
+            this.noteService.insertNote(note.getNoteTitle(), note.getNoteDescription(), currentLoggedInUser.getUserId());
         }
+
+        redirectAttributes.addAttribute("successMessage", "Note successfully saved.");
+
+        return "result";
     }
 
-    @DeleteMapping("/delete-note/{noteId}")
-    public void deleteNote(@PathVariable("noteId") Integer noteId, Authentication authentication) {
+    @PostMapping("/delete-note/{noteId}")
+    public String deleteNote(@PathVariable("noteId") Integer noteId, Authentication authentication, Model redirectAttrs) {
         String username = authentication.getName();
         User currentLoggedInUser = this.userService.getUserByUserName(username);
 
         if (currentLoggedInUser == null) {
-            return;
+            redirectAttrs.addAttribute("errorMessage", "No currently logged in user.");
+
+            return "result";
         }
 
         try {
@@ -68,12 +69,15 @@ public class NoteRestController {
             }
         } catch (JsonSyntaxException e) {
             System.err.println(e);
+
+            redirectAttrs.addAttribute("errorMessage", "Something went wrong while deleting a note. Please try again.");
+
+            return "result";
         }
+
+        redirectAttrs.addAttribute("successMessage", "Note successfully deleted.");
+
+        return "result";
     }
 
-    class JSONNoteData {
-        public String noteTitle;
-        public String noteDescription;
-        public String noteId;
-    }
 }

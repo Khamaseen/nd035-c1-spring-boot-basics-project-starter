@@ -20,6 +20,10 @@ public class Note {
         this.userId = userId;
     }
 
+    public Note() {
+        //
+    }
+
     public Integer getNoteId() {
         return noteId;
     }

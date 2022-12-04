@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import static com.udacity.jwdnd.course1.cloudstorage.utils.EscapeString.escape;
 
 @Controller()
 @RequestMapping("/signup")
@@ -25,8 +28,13 @@ public class SignUpController {
     }
 
     @PostMapping()
-    public String signupUser(@ModelAttribute UserForm userForm, Model model) {
+    public String signupUser(@ModelAttribute UserForm userForm, Model model, RedirectAttributes redirectAttrs) {
         String signupError = null;
+
+        userForm.setFirstName(escape(userForm.getFirstName()));
+        userForm.setLastName(escape(userForm.getLastName()));
+        userForm.setUsername(escape(userForm.getUsername()));
+        userForm.setPassword(escape(userForm.getPassword()));
 
         if (!userService.isUsernameAvailable(userForm.getUsername())) {
             signupError = "The username already exists.";
@@ -40,11 +48,13 @@ public class SignUpController {
         }
 
         if (signupError == null) {
-            model.addAttribute("signupSuccess", true);
+            redirectAttrs.addFlashAttribute("signupSuccess", true);
         } else {
             model.addAttribute("signupError", signupError);
+
+            return "signup";
         }
 
-        return "signup";
+        return "redirect:/login";
     }
 }
